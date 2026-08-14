@@ -1,0 +1,2 @@
+# utazastervezes-app
+Utazástervezés app

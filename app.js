@@ -314,7 +314,8 @@ function cardTemplate(p) {
           <p class="program-card__desc">${escapeHtml(p.description)}</p>
           <div class="program-card__meta">
             <span class="meta-item">${icon('car', { size: 14 })}${p.drive_minutes} perc · ${formatKm(p.distance_km)} km</span>
-            <span class="meta-item">${icon('clock', { size: 14 })}${p.duration} · ${icon('tag', { size: 14 })}${escapeHtml(p.price)}</span>
+            <span class="meta-item">${icon('clock', { size: 14 })}${p.duration}</span>
+            <span class="meta-item meta-item--price">${icon('tag', { size: 14 })}${escapeHtml(p.price)}</span>
           </div>
         </div>
         <div class="program-card__votes">

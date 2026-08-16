@@ -516,7 +516,13 @@ button {
   font-size: 0.79rem;
   color: var(--color-text-secondary);
   font-weight: 500;
-  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.meta-item--price {
+  flex-basis: 100%;
 }
 
 .meta-item .icon {

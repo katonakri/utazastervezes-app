@@ -26,8 +26,12 @@
       if (!meta || card.querySelector('.card-enhancement-row')) return;
 
       const info = durationInfo(meta.duration_hours_min);
+      const reviewCount = Number(meta.google_review_count || 0);
+      const countHtml = reviewCount > 0
+        ? `<span class="card-rating__count">(${reviewCount.toLocaleString('hu-HU')})</span>`
+        : '';
       const ratingHtml = meta.google_rating != null
-        ? `<div class="card-rating"><span class="card-rating__value">⭐ ${Number(meta.google_rating).toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span><span class="card-rating__stars">${stars(meta.google_rating)}</span><span class="card-rating__count">(${Number(meta.google_review_count || 0).toLocaleString('hu-HU')})</span></div>`
+        ? `<div class="card-rating"><span class="card-rating__value">⭐ ${Number(meta.google_rating).toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span><span class="card-rating__stars">${stars(meta.google_rating)}</span>${countHtml}</div>`
         : '';
 
       const links = card.querySelector('.program-card__links');

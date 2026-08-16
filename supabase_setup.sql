@@ -47,7 +47,7 @@ create table if not exists public.votes (
   id            bigint generated always as identity primary key,
   program_id    bigint not null references public.programs (id) on delete cascade,
   user_name     text not null
-                  check (user_name in ('Kristóf','Anna','Tina','Péter','Zsófi')),
+                  check (user_name in ('Deli','Peti','Ármin','Tina','Kristóf')),
   vote_type     text not null check (vote_type in ('like','dislike')),
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now(),
@@ -146,7 +146,7 @@ insert into public.programs
 values
   (
     'Síkfőkúti tavak', 'termeszet', 'tree',
-    'https://commons.wikimedia.org/wiki/Special:FilePath/A_S%C3%ADkf%C5%91k%C3%BAt_Project_panor%C3%A1ma_k%C3%A9pe.jpg',
+    'https://commons.wikimedia.org/wiki/Special:FilePath/A_S%C3%ADkf%C5%91k_Project_panor%C3%A1ma_k%C3%A9pe.jpg',
     'Tavak, erdő, forrás, patak és játszótér. Kellemes, árnyékos séta kisgyerekkel is.',
     1.2, 3,
     '1–2 óra', 1, 'Ingyenes', 0,

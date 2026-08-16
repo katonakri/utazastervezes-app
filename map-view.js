@@ -37,6 +37,11 @@
     </div>`;
   }
 
+  function hideResult() {
+    const sheet = document.getElementById('map-result-sheet');
+    if (sheet) sheet.classList.remove('is-visible');
+  }
+
   function showResult(p) {
     const cat = categoryConfig(p.category);
     const sheet = document.getElementById('map-result-sheet');
@@ -57,7 +62,7 @@
       </div>`;
     sheet.classList.add('is-visible');
     document.getElementById('map-detail-btn').addEventListener('click', () => {
-      sheet.classList.remove('is-visible');
+      hideResult();
       openDetail(Number(p.id));
     });
   }
@@ -69,6 +74,7 @@
       .map((cat) => `<button class="map-filter-pill ${activeMapCategory === cat.id ? 'is-active' : ''}" data-map-category="${cat.id}" type="button">${icon(cat.icon, { size: 15 })}<span>${escapeHtml(cat.label)}</span></button>`).join('');
     el.querySelectorAll('.map-filter-pill').forEach((btn) => btn.addEventListener('click', () => {
       activeMapCategory = btn.dataset.mapCategory;
+      hideResult();
       buildFilterBar();
       renderMarkers();
     }));
@@ -132,6 +138,7 @@
     map = L.map('map-canvas', { zoomControl: false, attributionControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap közreműködők' }).addTo(map);
     markerLayer = L.layerGroup().addTo(map);
+    map.on('click', hideResult);
     document.getElementById('map-locate-btn').addEventListener('click', locateUser);
     buildFilterBar(); renderMarkers();
   }
@@ -145,9 +152,25 @@
     ensureLeaflet(() => { initMap(); setTimeout(() => { if (map) { map.invalidateSize(); renderMarkers(); } }, 50); });
   }
 
-  function hideMapView() { const view = document.getElementById('map-view'); if (view) view.classList.add('hidden'); const sheet = document.getElementById('map-result-sheet'); if (sheet) sheet.classList.remove('is-visible'); }
-  function activateNav() { document.querySelectorAll('.bottom-nav-item').forEach((btn) => { btn.classList.toggle('is-active', btn.dataset.view === 'terkep'); btn.setAttribute('aria-current', btn.dataset.view === 'terkep' ? 'page' : 'false'); }); }
-  function switchToMap() { state.currentView = 'terkep'; activateNav(); showMapView(); }
+  function hideMapView() {
+    const view = document.getElementById('map-view');
+    if (view) view.classList.add('hidden');
+    hideResult();
+  }
+
+  function activateNav(view) {
+    document.querySelectorAll('.bottom-nav-item').forEach((btn) => {
+      const active = btn.dataset.view === view;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-current', active ? 'page' : 'false');
+    });
+  }
+
+  function switchToMap() {
+    state.currentView = 'terkep';
+    activateNav('kedvencek');
+    showMapView();
+  }
 
   function switchFromMap(view) {
     hideMapView();
@@ -167,7 +190,7 @@
       document.getElementById('placeholder-view').innerHTML = `${icon(content.icon, { size: 44 })}<h2>${content.title}</h2><p>${content.text}</p>`;
       document.getElementById('placeholder-view').classList.remove('hidden');
     }
-    document.querySelectorAll('.bottom-nav-item').forEach((btn) => { const active = btn.dataset.view === view; btn.classList.toggle('is-active', active); btn.setAttribute('aria-current', active ? 'page' : 'false'); });
+    activateNav(view);
   }
 
   function init() {
@@ -178,9 +201,33 @@
       oldFav.innerHTML = '<span class="bn-icon"></span>Térkép';
       oldFav.setAttribute('aria-label', 'Térkép');
       oldFav.querySelector('.bn-icon').innerHTML = icon('mapPin', { size: 21 });
-      nav.addEventListener('click', (event) => { const button = event.target.closest('[data-view="kedvencek"]'); if (!button) return; event.preventDefault(); event.stopImmediatePropagation(); switchToMap(); }, true);
     }
-    nav.querySelectorAll('.bottom-nav-item').forEach((btn) => { if (btn.dataset.view !== 'kedvencek') btn.addEventListener('click', () => { if (state.currentView === 'terkep') switchFromMap(btn.dataset.view); }); });
+
+    // A térkép a korábbi Kedvencek gomb helyét használja. A teljes navigációt
+    // itt kezeljük, amikor a térkép aktív, így az app.js eredeti view-kezelője
+    // nem tudja "elfogni" a kattintást és bent tartani a felhasználót a térképen.
+    nav.addEventListener('click', (event) => {
+      const button = event.target.closest('.bottom-nav-item');
+      if (!button) return;
+
+      if (state.currentView === 'terkep') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const targetView = button.dataset.view === 'kedvencek' ? 'terkep' : button.dataset.view;
+        if (targetView === 'terkep') {
+          switchToMap();
+        } else {
+          switchFromMap(targetView);
+        }
+        return;
+      }
+
+      if (button.dataset.view === 'kedvencek') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        switchToMap();
+      }
+    }, true);
   }
 
   window.addEventListener('DOMContentLoaded', init);

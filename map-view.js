@@ -3,7 +3,7 @@
  * ================================================================== */
 
 (function () {
-  const MAP_CATEGORIES = CATEGORIES.filter((c) => c.id !== 'osszes' && c.id !== 'etterem');
+  const MAP_CATEGORIES = CATEGORIES.filter((c) => c.id !== 'osszes');
   let map = null;
   let markerLayer = null;
   let userMarker = null;
@@ -11,7 +11,7 @@
 
   function mapPrograms() {
     const programs = state.programs.filter((p) =>
-      p.is_active !== false && p.latitude != null && p.longitude != null && p.category !== 'etterem'
+      p.is_active !== false && p.latitude != null && p.longitude != null
     );
     return activeMapCategory === 'osszes' ? programs : programs.filter((p) => p.category === activeMapCategory);
   }
@@ -89,7 +89,7 @@
     });
     if (programs.length) {
       const bounds = L.latLngBounds(programs.map((p) => [Number(p.latitude), Number(p.longitude)]));
-      map.fitBounds(bounds.pad(.16), { paddingTopLeft: [10, 80], paddingBottomRight: [10, 210], maxZoom: 13 });
+      map.fitBounds(bounds.pad(.16), { paddingTopLeft: [10, 80], paddingBottomRight: [10, 230], maxZoom: 13 });
     }
   }
 
@@ -145,15 +145,8 @@
     ensureLeaflet(() => { initMap(); setTimeout(() => { if (map) { map.invalidateSize(); renderMarkers(); } }, 50); });
   }
 
-  function hideMapView() { const view = document.getElementById('map-view'); if (view) view.classList.add('hidden'); }
-
-  function activateNav() {
-    document.querySelectorAll('.bottom-nav-item').forEach((btn) => {
-      btn.classList.toggle('is-active', btn.dataset.view === 'terkep');
-      btn.setAttribute('aria-current', btn.dataset.view === 'terkep' ? 'page' : 'false');
-    });
-  }
-
+  function hideMapView() { const view = document.getElementById('map-view'); if (view) view.classList.add('hidden'); const sheet = document.getElementById('map-result-sheet'); if (sheet) sheet.classList.remove('is-visible'); }
+  function activateNav() { document.querySelectorAll('.bottom-nav-item').forEach((btn) => { btn.classList.toggle('is-active', btn.dataset.view === 'terkep'); btn.setAttribute('aria-current', btn.dataset.view === 'terkep' ? 'page' : 'false'); }); }
   function switchToMap() { state.currentView = 'terkep'; activateNav(); showMapView(); }
 
   function switchFromMap(view) {
@@ -174,11 +167,7 @@
       document.getElementById('placeholder-view').innerHTML = `${icon(content.icon, { size: 44 })}<h2>${content.title}</h2><p>${content.text}</p>`;
       document.getElementById('placeholder-view').classList.remove('hidden');
     }
-    document.querySelectorAll('.bottom-nav-item').forEach((btn) => {
-      const active = btn.dataset.view === view;
-      btn.classList.toggle('is-active', active);
-      btn.setAttribute('aria-current', active ? 'page' : 'false');
-    });
+    document.querySelectorAll('.bottom-nav-item').forEach((btn) => { const active = btn.dataset.view === view; btn.classList.toggle('is-active', active); btn.setAttribute('aria-current', active ? 'page' : 'false'); });
   }
 
   function init() {
@@ -189,15 +178,9 @@
       oldFav.innerHTML = '<span class="bn-icon"></span>Térkép';
       oldFav.setAttribute('aria-label', 'Térkép');
       oldFav.querySelector('.bn-icon').innerHTML = icon('mapPin', { size: 21 });
-      nav.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-view="kedvencek"]');
-        if (!button) return;
-        event.preventDefault(); event.stopImmediatePropagation(); switchToMap();
-      }, true);
+      nav.addEventListener('click', (event) => { const button = event.target.closest('[data-view="kedvencek"]'); if (!button) return; event.preventDefault(); event.stopImmediatePropagation(); switchToMap(); }, true);
     }
-    nav.querySelectorAll('.bottom-nav-item').forEach((btn) => {
-      if (btn.dataset.view !== 'kedvencek') btn.addEventListener('click', () => { if (state.currentView === 'terkep') switchFromMap(btn.dataset.view); });
-    });
+    nav.querySelectorAll('.bottom-nav-item').forEach((btn) => { if (btn.dataset.view !== 'kedvencek') btn.addEventListener('click', () => { if (state.currentView === 'terkep') switchFromMap(btn.dataset.view); }); });
   }
 
   window.addEventListener('DOMContentLoaded', init);

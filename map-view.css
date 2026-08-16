@@ -23,22 +23,20 @@
 .map-marker--latnivalo { background: #c15a2b; }
 .map-marker--kisvasut { background: #7c5cbf; }
 .map-marker--etterem { background: #7c5cbf; }
+.map-marker--accommodation { background: #b84a75; width: 46px; height: 46px; }
 .map-location-dot { width: 18px; height: 18px; border-radius: 50%; background: #1685e5; border: 4px solid #fff; box-shadow: 0 0 0 9px rgba(22,133,229,.18), 0 2px 8px rgba(0,0,0,.25); }
 
 .map-result-sheet { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 500; background: rgba(255,255,255,.98); border-radius: 22px; box-shadow: 0 6px 28px rgba(16,24,40,.2); padding: 12px; transform: translateY(calc(100% + 20px)); transition: transform .2s ease; }
 .map-result-sheet.is-visible { transform: translateY(0); }
 .map-result-sheet__handle { width: 44px; height: 4px; border-radius: 999px; background: #d9dde3; margin: 0 auto 10px; }
 
-/* A kártya három egyértelmű sorra tagolódik:
-   1. kép + alapadatok
-   2. árak, teljes szélességben
-   3. műveleti gombok, teljes szélességben */
 .map-result-content { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 12px; row-gap: 10px; align-items: start; }
 .map-result-image { grid-column: 1; grid-row: 1; width: 96px; height: 96px; border-radius: 14px; object-fit: cover; background: #eef0f3; }
 .map-result-info { grid-column: 2; grid-row: 1; min-width: 0; }
 .map-result-title { margin: 0; font-size: 1.02rem; font-weight: 800; line-height: 1.22; }
 .map-result-meta { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 7px; align-items: center; font-size: .78rem; color: var(--color-text-secondary); }
 .map-result-category { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 999px; background: var(--color-primary-tint); color: var(--color-primary-dark); font-weight: 700; }
+.map-result-category--accommodation { background: #f8e8ef; color: #9a315a; }
 .map-result-desc { margin-top: 6px; color: var(--color-text-secondary); font-size: .78rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 .map-result-prices { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; min-width: 0; }
@@ -48,6 +46,11 @@
 
 .map-result-actions { grid-column: 1 / -1; grid-row: 3; margin-top: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; min-width: 0; }
 .map-result-actions .btn { width: 100%; min-width: 0; min-height: 42px; padding: 9px 10px; font-size: .8rem; justify-content: center; white-space: nowrap; }
+
+.map-accommodation-card { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; min-width: 0; }
+.map-accommodation-icon { width: 54px; height: 54px; flex: 0 0 54px; border-radius: 16px; background: #f8e8ef; color: #9a315a; display: flex; align-items: center; justify-content: center; }
+.map-accommodation-card .map-result-info { min-width: 0; }
+.map-accommodation-card .map-result-title { font-size: 1.02rem; }
 
 .leaflet-control-zoom { display: none; }
 .leaflet-control-attribution { font-size: 8px !important; opacity: .75; }

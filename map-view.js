@@ -219,19 +219,25 @@
   }
 
   function init() {
-    // A Térkép replaces the old Kedvencek slot to keep the bottom bar compact on phones.
     const nav = document.getElementById('bottom-nav');
     if (!nav) return;
     const oldFav = nav.querySelector('[data-view="kedvencek"]');
     if (oldFav) {
-      oldFav.dataset.view = 'terkep';
+      // Keep the original data-view so app.js does not break its existing switchView logic.
       oldFav.innerHTML = '<span class="bn-icon"></span>Térkép';
+      oldFav.setAttribute('aria-label', 'Térkép');
+      oldFav.querySelector('.bn-icon').innerHTML = icon('mapPin', { size: 21 });
+      nav.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-view="kedvencek"]');
+        if (!button) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        switchToMap();
+      }, true);
     }
+
     nav.querySelectorAll('.bottom-nav-item').forEach((btn) => {
-      if (btn.dataset.view === 'terkep') {
-        btn.querySelector('.bn-icon').innerHTML = icon('mapPin', { size: 21 });
-        btn.addEventListener('click', switchToMap);
-      } else {
+      if (btn.dataset.view !== 'kedvencek') {
         btn.addEventListener('click', () => {
           if (state.currentView === 'terkep') switchFromMap(btn.dataset.view);
         });

@@ -9,13 +9,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css?v=20260816-3" />
+<link rel="stylesheet" href="style.css?v=20260816-4" />
 <link rel="stylesheet" href="restaurant-ui.css?v=20260816-1" />
+<link rel="stylesheet" href="rating-duration.css?v=20260816-1" />
 <script>
 (function () {
   try {
     var savedUser = localStorage.getItem('noszvaj_current_user');
-    if (savedUser === 'Kristóf' || savedUser === 'Emma' || savedUser === 'Tina') {
+    var validUsers = ['Deli', 'Peti', 'Ármin', 'Tina', 'Kristóf'];
+    if (validUsers.indexOf(savedUser) !== -1) {
       document.documentElement.classList.add('has-saved-user');
     }
   } catch (e) {}
@@ -44,13 +46,14 @@ html.has-saved-user #app { display: block !important; }
   <nav class="bottom-nav" id="bottom-nav" aria-label="Fő navigáció"><button class="bottom-nav-item is-active" data-view="programok" type="button"><span class="bn-icon"></span>Programok</button><button class="bottom-nav-item" data-view="kedvencek" type="button"><span class="bn-icon"></span>Kedvencek</button><button class="bottom-nav-item" data-view="tervezett" type="button"><span class="bn-icon"></span>Tervezett</button><button class="bottom-nav-item" data-view="menu" type="button"><span class="bn-icon"></span>Menü</button></nav>
 </div>
 <div id="detail-sheet" class="detail-sheet hidden" role="dialog" aria-modal="true"><div class="sheet-backdrop" id="sheet-backdrop"></div><div class="sheet-panel" id="sheet-panel"><button class="sheet-close" id="sheet-close" type="button" aria-label="Bezárás"></button><div id="sheet-body"></div></div></div>
-<script src="boot.js?v=20260816-2"></script>
+<script src="boot.js?v=20260816-3"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-client.js?v=20260816-2"></script>
 <script src="icons.js?v=20260816-2"></script>
-<script src="data.js?v=20260816-2"></script>
+<script src="data.js?v=20260816-3"></script>
 <script src="restaurant-ui.js?v=20260816-1"></script>
 <script src="app.js?v=20260816-3"></script>
+<script src="rating-duration.js?v=20260816-1"></script>
 <script src="supabase-diagnostic.js?v=20260816-2"></script>
 </body>
 </html>

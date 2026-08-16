@@ -4,8 +4,18 @@
 
 (function () {
   const MAP_CATEGORIES = CATEGORIES.filter((c) => c.id !== 'osszes');
+  const ACCOMMODATION = {
+    title: 'Mustármag Vendégház',
+    address: 'Noszvaj, Béke út 22., 3325',
+    latitude: 47.94197,
+    longitude: 20.47364,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Must%C3%A1rmag+Vend%C3%A9gh%C3%A1z+Noszvaj+B%C3%A9ke+%C3%BAt+22',
+    website: 'https://mustarmagnoszvaj.hu/'
+  };
+
   let map = null;
   let markerLayer = null;
+  let accommodationLayer = null;
   let userMarker = null;
   let activeMapCategory = 'osszes';
 
@@ -26,6 +36,14 @@
       className: 'custom-map-marker',
       html: `<div class="map-marker map-marker--${escapeHtml(p.category)}"><span class="map-marker__inner">${icon(cat.icon, { size: 19 })}</span></div>`,
       iconSize: [42, 42], iconAnchor: [21, 42], popupAnchor: [0, -42],
+    });
+  }
+
+  function accommodationIcon() {
+    return L.divIcon({
+      className: 'custom-map-marker accommodation-marker-wrap',
+      html: `<div class="map-marker map-marker--accommodation"><span class="map-marker__inner">${icon('home', { size: 20 })}</span></div>`,
+      iconSize: [46, 46], iconAnchor: [23, 46], popupAnchor: [0, -46],
     });
   }
 
@@ -67,6 +85,26 @@
     });
   }
 
+  function showAccommodationResult() {
+    const sheet = document.getElementById('map-result-sheet');
+    document.getElementById('map-result-content').innerHTML = `
+      <div class="map-accommodation-card">
+        <div class="map-accommodation-icon">${icon('home', { size: 25 })}</div>
+        <div class="map-result-info">
+          <h2 class="map-result-title">${escapeHtml(ACCOMMODATION.title)}</h2>
+          <div class="map-result-meta">
+            <span class="map-result-category map-result-category--accommodation">Szállás</span>
+          </div>
+          <p class="map-result-desc">${escapeHtml(ACCOMMODATION.address)}</p>
+        </div>
+      </div>
+      <div class="map-result-actions">
+        <a class="btn btn--outline" href="${ACCOMMODATION.googleMapsUrl}" target="_blank" rel="noopener">${icon('mapPin', { size: 16 })}Navigálás</a>
+        <a class="btn btn--outline" href="${ACCOMMODATION.website}" target="_blank" rel="noopener">${icon('info', { size: 16 })}Szállás infó</a>
+      </div>`;
+    sheet.classList.add('is-visible');
+  }
+
   function buildFilterBar() {
     const el = document.getElementById('map-filter-bar');
     if (!el) return;
@@ -81,20 +119,40 @@
   }
 
   function renderMarkers() {
-    if (!map || !markerLayer) return;
+    if (!map || !markerLayer || !accommodationLayer) return;
     markerLayer.clearLayers();
+    accommodationLayer.clearLayers();
+
     const programs = mapPrograms();
-    document.getElementById('map-count').innerHTML = `<strong>${programs.length} találat a térképen</strong><span>A látható területen</span>`;
+    document.getElementById('map-count').innerHTML = `<strong>${programs.length} találat a térképen</strong><span>A látható területen · szállás külön jelölve</span>`;
+
     programs.forEach((p) => {
       const marker = L.marker([Number(p.latitude), Number(p.longitude)], { icon: markerIcon(p) });
-      marker.on('click', () => {
+      marker.on('click', (event) => {
+        L.DomEvent.stopPropagation(event);
         map.flyTo([Number(p.latitude), Number(p.longitude)], Math.max(map.getZoom(), 12), { duration: .35 });
         showResult(p);
       });
       marker.addTo(markerLayer);
     });
+
+    // A szállás fix térképi elem: nincs benne a programs táblában,
+    // ezért a programlistában és a kategóriaszűrésekben nem jelenik meg.
+    const accommodationMarker = L.marker(
+      [ACCOMMODATION.latitude, ACCOMMODATION.longitude],
+      { icon: accommodationIcon(), zIndexOffset: 1000 }
+    );
+    accommodationMarker.on('click', (event) => {
+      L.DomEvent.stopPropagation(event);
+      map.flyTo([ACCOMMODATION.latitude, ACCOMMODATION.longitude], Math.max(map.getZoom(), 13), { duration: .35 });
+      showAccommodationResult();
+    });
+    accommodationMarker.addTo(accommodationLayer);
+
     if (programs.length) {
-      const bounds = L.latLngBounds(programs.map((p) => [Number(p.latitude), Number(p.longitude)]));
+      const points = programs.map((p) => [Number(p.latitude), Number(p.longitude)]);
+      points.push([ACCOMMODATION.latitude, ACCOMMODATION.longitude]);
+      const bounds = L.latLngBounds(points);
       map.fitBounds(bounds.pad(.16), { paddingTopLeft: [10, 80], paddingBottomRight: [10, 230], maxZoom: 13 });
     }
   }
@@ -138,6 +196,7 @@
     map = L.map('map-canvas', { zoomControl: false, attributionControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap közreműködők' }).addTo(map);
     markerLayer = L.layerGroup().addTo(map);
+    accommodationLayer = L.layerGroup().addTo(map);
     map.on('click', hideResult);
     document.getElementById('map-locate-btn').addEventListener('click', locateUser);
     buildFilterBar(); renderMarkers();
@@ -203,9 +262,6 @@
       oldFav.querySelector('.bn-icon').innerHTML = icon('mapPin', { size: 21 });
     }
 
-    // A térkép a korábbi Kedvencek gomb helyét használja. A teljes navigációt
-    // itt kezeljük, amikor a térkép aktív, így az app.js eredeti view-kezelője
-    // nem tudja "elfogni" a kattintást és bent tartani a felhasználót a térképen.
     nav.addEventListener('click', (event) => {
       const button = event.target.closest('.bottom-nav-item');
       if (!button) return;
@@ -214,11 +270,8 @@
         event.preventDefault();
         event.stopImmediatePropagation();
         const targetView = button.dataset.view === 'kedvencek' ? 'terkep' : button.dataset.view;
-        if (targetView === 'terkep') {
-          switchToMap();
-        } else {
-          switchFromMap(targetView);
-        }
+        if (targetView === 'terkep') switchToMap();
+        else switchFromMap(targetView);
         return;
       }
 

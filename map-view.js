@@ -7,15 +7,13 @@
   let map = null;
   let markerLayer = null;
   let userMarker = null;
-  let selectedProgramId = null;
   let activeMapCategory = 'osszes';
 
   function mapPrograms() {
     const programs = state.programs.filter((p) =>
       p.is_active !== false && p.latitude != null && p.longitude != null && p.category !== 'etterem'
     );
-    if (activeMapCategory === 'osszes') return programs;
-    return programs.filter((p) => p.category === activeMapCategory);
+    return activeMapCategory === 'osszes' ? programs : programs.filter((p) => p.category === activeMapCategory);
   }
 
   function categoryConfig(category) {
@@ -27,9 +25,7 @@
     return L.divIcon({
       className: 'custom-map-marker',
       html: `<div class="map-marker map-marker--${escapeHtml(p.category)}"><span class="map-marker__inner">${icon(cat.icon, { size: 19 })}</span></div>`,
-      iconSize: [42, 42],
-      iconAnchor: [21, 42],
-      popupAnchor: [0, -42],
+      iconSize: [42, 42], iconAnchor: [21, 42], popupAnchor: [0, -42],
     });
   }
 
@@ -42,25 +38,22 @@
   }
 
   function showResult(p) {
-    selectedProgramId = Number(p.id);
     const cat = categoryConfig(p.category);
     const sheet = document.getElementById('map-result-sheet');
-    const content = document.getElementById('map-result-content');
-    content.innerHTML = `
+    document.getElementById('map-result-content').innerHTML = `
       <img class="map-result-image" src="${p.image_url || ''}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.style.visibility='hidden'" />
       <div class="map-result-info">
         <h2 class="map-result-title">${escapeHtml(p.title)}</h2>
         <div class="map-result-meta">
           <span class="map-result-category">${icon(cat.icon, { size: 13 })}${escapeHtml(cat.label)}</span>
-          <span>${formatKm(p.distance_km ?? '-')} km</span>
-          <span>${p.drive_minutes ?? '-'} perc</span>
+          <span>${formatKm(p.distance_km ?? '-')} km</span><span>${p.drive_minutes ?? '-'} perc</span>
         </div>
         <p class="map-result-desc">${escapeHtml(p.description || '')}</p>
       </div>
       ${priceMarkup(p)}
       <div class="map-result-actions">
         <button class="btn btn--outline" id="map-detail-btn" type="button">${icon('info', { size: 16 })}Részletek</button>
-        <a class="btn btn--outline" href="${p.google_maps_url || '#'}" target="_blank" rel="noopener">${icon('navigation', { size: 16 })}Navigálás</a>
+        <a class="btn btn--outline" href="${p.google_maps_url || '#'}" target="_blank" rel="noopener">${icon('mapPin', { size: 16 })}Navigálás</a>
       </div>`;
     sheet.classList.add('is-visible');
     document.getElementById('map-detail-btn').addEventListener('click', () => {
@@ -73,8 +66,7 @@
     const el = document.getElementById('map-filter-bar');
     if (!el) return;
     el.innerHTML = [{ id: 'osszes', label: 'Összes', icon: 'grid' }, ...MAP_CATEGORIES]
-      .map((cat) => `<button class="map-filter-pill ${activeMapCategory === cat.id ? 'is-active' : ''}" data-map-category="${cat.id}" type="button">${icon(cat.icon, { size: 15 })}<span>${escapeHtml(cat.label)}</span></button>`)
-      .join('');
+      .map((cat) => `<button class="map-filter-pill ${activeMapCategory === cat.id ? 'is-active' : ''}" data-map-category="${cat.id}" type="button">${icon(cat.icon, { size: 15 })}<span>${escapeHtml(cat.label)}</span></button>`).join('');
     el.querySelectorAll('.map-filter-pill').forEach((btn) => btn.addEventListener('click', () => {
       activeMapCategory = btn.dataset.mapCategory;
       buildFilterBar();
@@ -87,7 +79,6 @@
     markerLayer.clearLayers();
     const programs = mapPrograms();
     document.getElementById('map-count').innerHTML = `<strong>${programs.length} találat a térképen</strong><span>A látható területen</span>`;
-
     programs.forEach((p) => {
       const marker = L.marker([Number(p.latitude), Number(p.longitude)], { icon: markerIcon(p) });
       marker.on('click', () => {
@@ -96,7 +87,6 @@
       });
       marker.addTo(markerLayer);
     });
-
     if (programs.length) {
       const bounds = L.latLngBounds(programs.map((p) => [Number(p.latitude), Number(p.longitude)]));
       map.fitBounds(bounds.pad(.16), { paddingTopLeft: [10, 80], paddingBottomRight: [10, 210], maxZoom: 13 });
@@ -124,42 +114,26 @@
       <div id="map-canvas" class="map-canvas"></div>
       <div id="map-filter-bar" class="map-filter-bar" aria-label="Térkép szűrők"></div>
       <div id="map-count" class="map-count-card"></div>
-      <div class="map-control-stack">
-        <button class="map-control-btn" id="map-locate-btn" type="button" aria-label="Saját helyzet">${icon('target', { size: 21 })}</button>
-      </div>
-      <div id="map-result-sheet" class="map-result-sheet" aria-live="polite">
-        <div class="map-result-sheet__handle"></div>
-        <div id="map-result-content" class="map-result-content"></div>
-      </div>`;
+      <div class="map-control-stack"><button class="map-control-btn" id="map-locate-btn" type="button" aria-label="Saját helyzet">${icon('mapPin', { size: 21 })}</button></div>
+      <div id="map-result-sheet" class="map-result-sheet" aria-live="polite"><div class="map-result-sheet__handle"></div><div id="map-result-content" class="map-result-content"></div></div>`;
     document.getElementById('app').insertBefore(view, document.getElementById('placeholder-view'));
   }
 
   function ensureLeaflet(callback) {
     if (window.L) { callback(); return; }
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload = callback;
-    script.onerror = () => {
-      document.getElementById('map-canvas').innerHTML = '<div class="empty-state"><p>A térkép betöltése nem sikerült.</p></div>';
-    };
+    const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(link);
+    const script = document.createElement('script'); script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; script.onload = callback;
+    script.onerror = () => { document.getElementById('map-canvas').innerHTML = '<div class="empty-state"><p>A térkép betöltése nem sikerült.</p></div>'; };
     document.head.appendChild(script);
   }
 
   function initMap() {
     if (map || !window.L) return;
     map = L.map('map-canvas', { zoomControl: false, attributionControl: true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap közreműködők',
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap közreműködők' }).addTo(map);
     markerLayer = L.layerGroup().addTo(map);
     document.getElementById('map-locate-btn').addEventListener('click', locateUser);
-    buildFilterBar();
-    renderMarkers();
+    buildFilterBar(); renderMarkers();
   }
 
   function showMapView() {
@@ -167,18 +141,11 @@
     document.querySelector('.sort-bar').classList.add('hidden');
     document.getElementById('category-bar').classList.add('hidden');
     document.getElementById('placeholder-view').classList.add('hidden');
-    createMapView();
-    document.getElementById('map-view').classList.remove('hidden');
-    ensureLeaflet(() => {
-      initMap();
-      setTimeout(() => { if (map) { map.invalidateSize(); renderMarkers(); } }, 50);
-    });
+    createMapView(); document.getElementById('map-view').classList.remove('hidden');
+    ensureLeaflet(() => { initMap(); setTimeout(() => { if (map) { map.invalidateSize(); renderMarkers(); } }, 50); });
   }
 
-  function hideMapView() {
-    const view = document.getElementById('map-view');
-    if (view) view.classList.add('hidden');
-  }
+  function hideMapView() { const view = document.getElementById('map-view'); if (view) view.classList.add('hidden'); }
 
   function activateNav() {
     document.querySelectorAll('.bottom-nav-item').forEach((btn) => {
@@ -187,11 +154,7 @@
     });
   }
 
-  function switchToMap() {
-    state.currentView = 'terkep';
-    activateNav();
-    showMapView();
-  }
+  function switchToMap() { state.currentView = 'terkep'; activateNav(); showMapView(); }
 
   function switchFromMap(view) {
     hideMapView();
@@ -223,25 +186,17 @@
     if (!nav) return;
     const oldFav = nav.querySelector('[data-view="kedvencek"]');
     if (oldFav) {
-      // Keep the original data-view so app.js does not break its existing switchView logic.
       oldFav.innerHTML = '<span class="bn-icon"></span>Térkép';
       oldFav.setAttribute('aria-label', 'Térkép');
       oldFav.querySelector('.bn-icon').innerHTML = icon('mapPin', { size: 21 });
       nav.addEventListener('click', (event) => {
         const button = event.target.closest('[data-view="kedvencek"]');
         if (!button) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        switchToMap();
+        event.preventDefault(); event.stopImmediatePropagation(); switchToMap();
       }, true);
     }
-
     nav.querySelectorAll('.bottom-nav-item').forEach((btn) => {
-      if (btn.dataset.view !== 'kedvencek') {
-        btn.addEventListener('click', () => {
-          if (state.currentView === 'terkep') switchFromMap(btn.dataset.view);
-        });
-      }
+      if (btn.dataset.view !== 'kedvencek') btn.addEventListener('click', () => { if (state.currentView === 'terkep') switchFromMap(btn.dataset.view); });
     });
   }
 

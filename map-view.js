@@ -136,8 +136,6 @@
       marker.addTo(markerLayer);
     });
 
-    // A szállás fix térképi elem: nincs benne a programs táblában,
-    // ezért a programlistában és a kategóriaszűrésekben nem jelenik meg.
     const accommodationMarker = L.marker(
       [ACCOMMODATION.latitude, ACCOMMODATION.longitude],
       { icon: accommodationIcon(), zIndexOffset: 1000 }
@@ -169,6 +167,11 @@
     }, () => {});
   }
 
+  function locateAccommodation() {
+    hideResult();
+    map.flyTo([ACCOMMODATION.latitude, ACCOMMODATION.longitude], 15, { duration: .55 });
+  }
+
   function createMapView() {
     if (document.getElementById('map-view')) return;
     const view = document.createElement('section');
@@ -178,7 +181,10 @@
       <div id="map-canvas" class="map-canvas"></div>
       <div id="map-filter-bar" class="map-filter-bar" aria-label="Térkép szűrők"></div>
       <div id="map-count" class="map-count-card"></div>
-      <div class="map-control-stack"><button class="map-control-btn" id="map-locate-btn" type="button" aria-label="Saját helyzet">${icon('mapPin', { size: 21 })}</button></div>
+      <div class="map-control-stack">
+        <button class="map-control-btn" id="map-locate-btn" type="button" aria-label="Saját helyzet">${icon('mapPin', { size: 21 })}</button>
+        <button class="map-control-btn map-control-btn--accommodation" id="map-accommodation-btn" type="button" aria-label="Szállás helye" title="Szállás helye">${icon('home', { size: 21 })}</button>
+      </div>
       <div id="map-result-sheet" class="map-result-sheet" aria-live="polite"><div class="map-result-sheet__handle"></div><div id="map-result-content" class="map-result-content"></div></div>`;
     document.getElementById('app').insertBefore(view, document.getElementById('placeholder-view'));
   }
@@ -199,6 +205,7 @@
     accommodationLayer = L.layerGroup().addTo(map);
     map.on('click', hideResult);
     document.getElementById('map-locate-btn').addEventListener('click', locateUser);
+    document.getElementById('map-accommodation-btn').addEventListener('click', locateAccommodation);
     buildFilterBar(); renderMarkers();
   }
 

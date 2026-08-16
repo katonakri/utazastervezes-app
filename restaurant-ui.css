@@ -1,0 +1,17 @@
+/* Restaurant category styling */
+:root {
+  --cat-etterem-bg: #f7ebe4;
+  --cat-etterem-text: #a9572f;
+}
+
+.category-tag[data-category='etterem'],
+.category-pill[data-category='etterem'] {
+  --tag-bg: var(--cat-etterem-bg);
+  --tag-fg: var(--cat-etterem-text);
+  --pill-accent: var(--cat-etterem-text);
+}
+
+.program-card__media-fallback[data-category='etterem'] {
+  --fallback-bg: var(--cat-etterem-bg);
+  --fallback-fg: var(--cat-etterem-text);
+}

@@ -2,7 +2,7 @@
 (function () {
   try {
     const savedUser = localStorage.getItem('noszvaj_current_user');
-    const validUsers = ['Kristóf', 'Emma', 'Tina'];
+    const validUsers = ['Deli', 'Peti', 'Ármin', 'Tina', 'Kristóf'];
     if (savedUser && validUsers.includes(savedUser)) {
       const overlay = document.getElementById('name-select-overlay');
       const app = document.getElementById('app');

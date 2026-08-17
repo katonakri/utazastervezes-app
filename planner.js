@@ -202,7 +202,10 @@
     const title = document.querySelector('.app-title');
     if (title) title.textContent = 'Noszvaj és környéke';
     const placeholder = document.getElementById('placeholder-view');
-    if (placeholder) placeholder.className = 'placeholder-view hidden';
+    if (placeholder) {
+      placeholder.className = 'placeholder-view';
+      if (state.currentView === 'programok') placeholder.classList.add('hidden');
+    }
   }
 
   // app.js owns main navigation. This module only adds a planner-specific

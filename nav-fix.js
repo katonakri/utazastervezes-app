@@ -53,8 +53,8 @@
     const view = button.dataset.view;
     event.preventDefault();
     event.stopImmediatePropagation();
-    setTitle(view);
     cleanupBefore(view);
+    setTitle(view);
 
     if (view === 'kedvencek') {
       dispatchToMap(button);
@@ -63,20 +63,24 @@
 
     if (view === 'tervezett' && typeof window.renderPlannerView === 'function') {
       window.renderPlannerView();
+      setTitle(view);
       return;
     }
     if (view === 'info' && window.InfoView && typeof window.InfoView.show === 'function') {
       window.InfoView.show();
       state.currentView = 'info';
+      setTitle(view);
       return;
     }
     if (view === 'menu' && window.BringList && typeof window.BringList.show === 'function') {
       window.BringList.show();
       state.currentView = 'menu';
+      setTitle(view);
       return;
     }
     if (view === 'programok' && typeof window.switchView === 'function') {
       window.switchView('programok');
+      setTitle(view);
       return;
     }
   }

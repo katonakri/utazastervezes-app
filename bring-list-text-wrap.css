@@ -1,0 +1,33 @@
+/* Bring list: allow long item names to wrap naturally instead of truncating. */
+.bring-card__body {
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.bring-card__body h3 {
+  font-size: 14px;
+  line-height: 1.3;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  margin: 0;
+}
+
+.bring-card__body p {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+
+.bring-card {
+  min-height: 52px;
+}
+
+@media (max-width: 600px) {
+  .bring-card__body h3 {
+    font-size: 13.5px;
+  }
+}

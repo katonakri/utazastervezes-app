@@ -1,6 +1,7 @@
-/* Navigation compatibility layer.
- * IMPORTANT: do not intercept navigation. Each view owns its own handler.
- * This file only keeps the header title synchronized with the clicked tab.
+/* Central navigation router.
+ * View modules still own their rendering, but this single capture-phase
+ * router prevents their independent navigation listeners from fighting each
+ * other. The map tab is deliberately allowed through to map-view.js.
  */
 (function () {
   const TITLES = {
@@ -11,17 +12,46 @@
     menu: 'Mit hozzunk?',
   };
 
+  function setTitle(view) {
+    const title = document.querySelector('.app-title');
+    if (title && TITLES[view]) title.textContent = TITLES[view];
+  }
+
+  function route(view, event) {
+    setTitle(view);
+
+    // Térkép is implemented by map-view.js and must receive the original click.
+    if (view === 'kedvencek') return false;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    if (view === 'tervezett' && typeof window.renderPlannerView === 'function') {
+      window.renderPlannerView();
+      return true;
+    }
+    if (view === 'info' && window.InfoView && typeof window.InfoView.show === 'function') {
+      window.InfoView.show();
+      state.currentView = 'info';
+      return true;
+    }
+    if (view === 'menu' && window.BringList && typeof window.BringList.show === 'function') {
+      window.BringList.show();
+      state.currentView = 'menu';
+      return true;
+    }
+    if (view === 'programok' && typeof window.switchView === 'function') {
+      window.switchView('programok');
+      return true;
+    }
+    return false;
+  }
+
   function init() {
-    window.addEventListener('click', function (event) {
-      const navButton = event.target.closest && event.target.closest('.bottom-nav-item[data-view]');
-      if (!navButton) return;
-      const title = TITLES[navButton.dataset.view];
-      if (title) {
-        const el = document.querySelector('.app-title');
-        if (el) el.textContent = title;
-      }
-      // Never preventDefault/stopPropagation here. The individual view modules
-      // must receive the same click event and perform their own navigation.
+    window.addEventListener('click', (event) => {
+      const button = event.target.closest && event.target.closest('.bottom-nav-item[data-view]');
+      if (!button) return;
+      route(button.dataset.view, event);
     }, true);
   }
 

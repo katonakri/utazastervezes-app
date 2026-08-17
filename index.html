@@ -15,15 +15,13 @@
 <link rel="stylesheet" href="price-details.css?v=20260816-1" />
 <link rel="stylesheet" href="map-view.css?v=20260816-3" />
 <link rel="stylesheet" href="bring-list.css?v=20260817-1" />
-<link rel="stylesheet" href="bring-list-fixes.css?v=20260817-2" />
+<link rel="stylesheet" href="bring-list-fixes.css?v=20260817-3" />
 <script>
 (function () {
   try {
     var savedUser = localStorage.getItem('noszvaj_current_user');
     var validUsers = ['Deli', 'Peti', 'Ármin', 'Tina', 'Kristóf'];
-    if (validUsers.indexOf(savedUser) !== -1) {
-      document.documentElement.classList.add('has-saved-user');
-    }
+    if (validUsers.indexOf(savedUser) !== -1) document.documentElement.classList.add('has-saved-user');
   } catch (e) {}
 })();
 </script>
@@ -62,7 +60,8 @@ html.has-saved-user #app { display: block !important; }
 <script src="price-details.js?v=20260816-1"></script>
 <script src="map-view.js?v=20260816-4"></script>
 <script src="bring-list.js?v=20260817-1"></script>
-<script src="bring-list-fixes.js?v=20260817-1"></script>
+<script src="bring-list-fixes.js?v=20260817-2"></script>
+<script src="bring-list-interactions.js?v=20260817-1"></script>
 <script src="supabase-diagnostic.js?v=20260816-2"></script>
 </body>
 </html>

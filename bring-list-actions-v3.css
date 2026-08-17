@@ -1,0 +1,38 @@
+/* Compact, icon-free cards with a dedicated delete affordance. */
+.bring-card__icon { display: none !important; }
+.bring-card__menu { display: none !important; }
+.bring-card { cursor: pointer; position: relative; }
+.bring-card__body { padding-right: 34px; }
+.bring-card__delete {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(40,40,40,.52);
+  cursor: pointer;
+}
+.bring-card__delete:hover,
+.bring-card__delete:active { background: rgba(0,0,0,.06); color: rgba(40,40,40,.82); }
+.bring-card__delete svg { width: 17px; height: 17px; }
+
+.bring-save--top {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  width: 100%;
+  margin: 0 0 14px;
+}
+
+@media (max-width: 600px) {
+  .bring-card__delete { right: 8px; }
+  .bring-card__body { padding-right: 32px; }
+}

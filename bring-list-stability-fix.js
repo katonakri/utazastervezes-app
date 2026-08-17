@@ -4,6 +4,11 @@
  * not rewritten.
  */
 (() => {
+  // The add screen must not render a live card preview.
+  const style = document.createElement('style');
+  style.textContent = '.bring-preview-label, .bring-preview { display:none !important; }';
+  document.head.appendChild(style);
+
   function getBringButton(target) {
     return target?.closest?.('.bottom-nav-item[data-view="menu"]');
   }

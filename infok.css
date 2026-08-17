@@ -1,0 +1,56 @@
+/* ==================================================================
+   INFÓK
+   ================================================================== */
+.info-view { max-width: var(--content-max); margin: 0 auto; padding: 20px 16px 28px; }
+.info-page__header { margin-bottom: 18px; }
+.info-kicker { color: var(--color-primary); font-size: .76rem; font-weight: 750; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+.info-page__header h2 { font-size: 1.75rem; line-height: 1.15; font-weight: 800; letter-spacing: -.02em; }
+.info-page__header p { margin-top: 7px; color: var(--color-text-secondary); font-size: .9rem; line-height: 1.45; }
+.info-list { display: flex; flex-direction: column; gap: 12px; }
+.info-card { position: relative; display: flex; align-items: flex-start; gap: 12px; border: 1px solid rgba(16,24,40,.06); border-radius: var(--radius-lg); padding: 16px 44px 16px 16px; background: var(--info-bg); color: var(--color-text); box-shadow: var(--shadow-card); }
+.info-card__content { min-width: 0; width: 100%; }
+.info-card__content h3 { font-size: 1rem; line-height: 1.3; font-weight: 750; }
+.info-card__description { margin-top: 6px; color: var(--color-text-secondary); font-size: .88rem; line-height: 1.48; white-space: pre-wrap; overflow-wrap: anywhere; }
+.info-card__description a { color: var(--color-link); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.info-card__menu { position: absolute; top: 10px; right: 8px; width: 34px; height: 34px; border-radius: 9px; color: var(--color-text-secondary); font-size: 1.3rem; line-height: 1; }
+.info-card__menu:hover { background: rgba(255,255,255,.55); }
+.info-card__actions { position: absolute; top: 45px; right: 10px; z-index: 8; min-width: 140px; padding: 5px; border: 1px solid var(--color-border); border-radius: 11px; background: var(--color-surface); box-shadow: 0 8px 22px rgba(16,24,40,.14); }
+.info-card__actions button { display: block; width: 100%; padding: 9px 10px; border-radius: 7px; text-align: left; font-size: .86rem; font-weight: 650; }
+.info-card__actions button:hover { background: var(--color-bg); }
+.info-card__actions button:last-child { color: #c43d36; }
+.info-card--mint { --info-bg: #E7F6ED; }
+.info-card--yellow { --info-bg: #FBF2DC; }
+.info-card--blue { --info-bg: #E8F2FD; }
+.info-card--purple { --info-bg: #F0EBFA; }
+.info-card--pink { --info-bg: #FBEAEC; }
+.info-card--gray { --info-bg: #F1F2F4; }
+.info-add { width: 100%; min-height: 48px; margin-top: 16px; border-radius: var(--radius-pill); background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: .94rem; font-weight: 750; box-shadow: 0 2px 7px rgba(46,158,91,.18); }
+.info-add:active { transform: scale(.99); }
+.info-add > span { font-size: 1.45rem; line-height: 1; font-weight: 400; }
+.info-empty { text-align: center; padding: 46px 22px 32px; color: var(--color-text-secondary); }
+.info-empty .icon { margin: 0 auto 12px; color: var(--color-text-tertiary); }
+.info-empty h3 { color: var(--color-text); font-size: 1rem; }
+.info-empty p { margin-top: 7px; font-size: .88rem; line-height: 1.45; }
+#info-modal-host { position: fixed; inset: 0; z-index: 120; }
+.info-modal-backdrop { position: absolute; inset: 0; background: var(--color-bg); }
+.info-modal { position: relative; z-index: 1; width: 100%; max-width: 720px; height: 100%; margin: 0 auto; overflow-y: auto; background: var(--color-surface); padding-bottom: calc(28px + env(safe-area-inset-bottom,0)); }
+.info-modal__header { position: sticky; top: 0; z-index: 3; min-height: 60px; display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--color-border); backdrop-filter: blur(8px); }
+.info-modal__header h2 { font-size: 1.02rem; font-weight: 800; text-align: center; }
+.info-back { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: var(--color-text); }
+.info-header-save { color: var(--color-primary); font-size: .9rem; font-weight: 750; padding: 8px 4px; }
+.info-form { padding: 24px 20px 10px; }
+.info-form > label, .info-color-label { display: block; margin: 0 0 8px; font-size: .88rem; font-weight: 700; color: var(--color-text); }
+.info-form > label span { color: #d0443c; }
+.info-form input, .info-form textarea { width: 100%; border: 1.5px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font: inherit; font-size: .92rem; padding: 13px 14px; outline: none; }
+.info-form input:focus, .info-form textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-tint); }
+.info-form input { margin-bottom: 22px; min-height: 48px; }
+.info-form textarea { min-height: 230px; resize: vertical; line-height: 1.5; }
+.info-form textarea::placeholder, .info-form input::placeholder { color: var(--color-text-tertiary); }
+.info-color-label { margin-top: 24px; }
+.info-color-options { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+.info-color-option { width: 48px; height: 48px; border-radius: 13px; padding: 4px; border: 1.5px solid transparent; background: transparent; display: flex; align-items: center; justify-content: center; }
+.info-color-option > span { width: 100%; height: 100%; border-radius: 10px; background: var(--info-color-bg); display: block; position: relative; }
+.info-color-option.is-selected { border-color: var(--info-color-fg); }
+.info-color-option.is-selected > span::after { content: ''; position: absolute; left: 50%; top: 50%; width: 8px; height: 13px; border-right: 2px solid var(--info-color-fg); border-bottom: 2px solid var(--info-color-fg); transform: translate(-50%,-58%) rotate(45deg); }
+.info-save { width: 100%; min-height: 50px; border-radius: var(--radius-pill); background: var(--color-primary); color: #fff; font-size: .96rem; font-weight: 750; }
+@media (min-width: 680px) { .info-view { padding-top: 28px; } .info-card { padding-right: 50px; } .info-modal { box-shadow: 0 0 30px rgba(16,24,40,.12); } }

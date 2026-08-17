@@ -19,6 +19,11 @@
 <link rel="stylesheet" href="bring-list-text-wrap.css?v=20260817-1" />
 <link rel="stylesheet" href="bring-list-no-mine-icon.css?v=20260817-2" />
 <link rel="stylesheet" href="info-view.css?v=20260817-1" />
+<style>
+/* A Programokhoz tartozó hozzáadás vezérlő soha ne jelenjen meg a Mit hozzunk? nézetben. */
+body:has(.bring-view) #add-program-btn,
+body:has(.bring-view) .add-program-btn { display:none !important; }
+</style>
 <script>(function(){try{var savedUser=localStorage.getItem('noszvaj_current_user');var validUsers=['Deli','Peti','Ármin','Tina','Kristóf'];if(validUsers.indexOf(savedUser)!==-1)document.documentElement.classList.add('has-saved-user')}catch(e){}})();</script>
 <style>html.has-saved-user .name-select-overlay{display:none!important}html.has-saved-user #app{display:block!important}</style>
 </head>

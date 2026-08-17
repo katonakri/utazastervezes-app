@@ -1,13 +1,45 @@
 /* Stable Mit hozzunk? interaction layer. No observers, no polling. */
 (() => {
   let activeItemId = null;
-  let savedPrompt = null;
   function ensureOttveszFilter(){const filters=document.querySelector('.bring-filters');if(!filters||filters.querySelector('[data-bring-filter="ottvesz"]'))return;const b=document.createElement('button');b.type='button';b.className='bring-filter bring-filter--neutral';b.dataset.bringFilter='ottvesz';b.textContent='Ott vesszük';filters.appendChild(b);}
   function filterOttvesz(){document.querySelectorAll('.bring-card[data-bring-id]').forEach(card=>{const t=card.querySelector('.bring-card__assignees')?.textContent||'';card.style.display=t.includes('Ott vesszük')?'':'none';});}
   function ensureOttveszOption(){const options=document.querySelector('.bring-assignee-options');if(!options||options.querySelector('[data-bring-members="Ott vesszük"]'))return;const l=document.createElement('label');l.className='bring-option bring-option--neutral';l.innerHTML='<input type="checkbox" value="Ott vesszük" data-bring-members="Ott vesszük"><span class="bring-option__dot"></span><span>Ott vesszük</span><span class="bring-check">✓</span>';options.appendChild(l);}
   function installDeleteButton(itemId){const modal=document.querySelector('#bring-modal-host .bring-modal');if(!modal||!itemId||modal.querySelector('#bring-delete-top'))return;const header=modal.querySelector('.bring-modal__header');if(!header)return;activeItemId=itemId;const b=document.createElement('button');b.id='bring-delete-top';b.type='button';b.className='bring-delete-top';b.setAttribute('aria-label','Elem törlése');b.innerHTML='<span aria-hidden="true">🗑</span><span>Törlés</span>';b.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();const name=modal.querySelector('#bring-name')?.value?.trim()||'ezt az elemet';if(!confirm(`Biztosan törlöd ezt: „${name}”?`))return;b.disabled=true;try{const a=await supabase.from('bring_item_assignees').delete().eq('item_id',activeItemId);if(a.error)throw a.error;const r=await supabase.from('bring_items').delete().eq('id',activeItemId);if(r.error)throw r.error;document.getElementById('bring-modal-host')?.remove();document.querySelector(`.bring-card[data-bring-id="${CSS.escape(String(activeItemId))}"]`)?.remove();activeItemId=null;const c=document.getElementById('bring-count');if(c)c.textContent=`${document.querySelectorAll('.bring-card[data-bring-id]').length} elem`;}catch(err){console.error(err);b.disabled=false;alert('Az elem törlése nem sikerült.');}});header.appendChild(b);}
-  function openCardDirect(card){const id=card?.dataset?.bringId;if(!id)return;const menu=card.querySelector('[data-bring-action="menu"]');if(!menu)return;savedPrompt=window.prompt;window.prompt=()=> '1';try{menu.click();}finally{window.setTimeout(()=>{window.prompt=savedPrompt;savedPrompt=null;},0);}window.setTimeout(()=>installDeleteButton(id),50);}
-  document.addEventListener('click',event=>{const card=event.target.closest?.('.bring-card[data-bring-id]');if(card&&!event.target.closest('button,input,textarea,select,a')){event.preventDefault();openCardDirect(card);return;}if(event.target.closest?.('#bring-add'))window.setTimeout(ensureOttveszOption,50);if(event.target.closest?.('[data-bring-filter="ottvesz"]'))window.setTimeout(filterOttvesz,0);if(event.target.closest?.('[data-view="menu"]'))window.setTimeout(ensureOttveszFilter,100);},false);
-  document.addEventListener('click',event=>{if(event.target.closest?.('#bring-cancel,#bring-modal-backdrop'))activeItemId=null;if(event.target.closest?.('.bring-card[data-bring-id]')){const id=event.target.closest('.bring-card[data-bring-id]')?.dataset?.bringId;if(id)window.setTimeout(()=>{ensureOttveszOption();installDeleteButton(id);},60);}},false);
+
+  // Capture at window level, before bring-list.js's document capture handler.
+  // This completely bypasses the legacy "Szerkesztés / Törlés" prompt.
+  window.addEventListener('click', event => {
+    const card = event.target.closest?.('.bring-card[data-bring-id]');
+    if (!card) return;
+    if (event.target.closest('button,input,textarea,select,a')) return;
+    const id = card.dataset.bringId;
+    if (!id || id === 'preview') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const name = card.querySelector('h3')?.textContent?.trim() || '';
+    const description = card.querySelector('.bring-card__body p')?.textContent?.trim() || '';
+    const assigneesText = card.querySelector('.bring-card__assignees')?.textContent || '';
+    const assignees = [];
+    if (assigneesText.includes('Deli és Peti')) assignees.push('Deli','Peti');
+    if (assigneesText.includes('Tina és Kristóf')) assignees.push('Tina','Kristóf');
+    if (assigneesText.includes('Ármin')) assignees.push('Ármin');
+    if (assigneesText.includes('Ott vesszük')) assignees.push('Ott vesszük');
+    if (typeof window.openBringEditModal === 'function') {
+      window.openBringEditModal({id,name,description,assignees});
+    } else {
+      // Expose a one-shot fallback for the existing private openModal function.
+      const menu = card.querySelector('[data-bring-action="menu"]');
+      if (menu) {
+        const originalPrompt = window.prompt;
+        window.prompt = () => '1';
+        menu.click();
+        window.prompt = originalPrompt;
+        window.setTimeout(() => installDeleteButton(id), 50);
+      }
+    }
+  }, true);
+
+  document.addEventListener('click',event=>{if(event.target.closest?.('#bring-add'))window.setTimeout(ensureOttveszOption,50);if(event.target.closest?.('[data-bring-filter="ottvesz"]'))window.setTimeout(filterOttvesz,0);if(event.target.closest?.('[data-view="menu"]'))window.setTimeout(ensureOttveszFilter,100);},false);
+  document.addEventListener('click',event=>{if(event.target.closest?.('#bring-cancel,#bring-modal-backdrop'))activeItemId=null;},false);
   document.addEventListener('DOMContentLoaded',()=>window.setTimeout(ensureOttveszFilter,300));
 })();

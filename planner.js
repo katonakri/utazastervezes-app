@@ -208,15 +208,8 @@
     }
   }
 
-  // app.js owns main navigation. This module only adds a planner-specific
-  // handler after app.js, so other tabs keep their normal navigation flow.
-  document.querySelectorAll('.bottom-nav-item').forEach((item) => {
-    item.addEventListener('click', () => {
-      if (item.dataset.view === 'tervezett') activatePlanner();
-      else restoreHeaderForOtherView();
-    });
-  });
-
+  // Navigation is intentionally owned by app.js. This module only exposes
+  // the planner renderer and does not register competing nav listeners.
   window.renderPlannerView = activatePlanner;
   window.leavePlannerView = restoreHeaderForOtherView;
 })();

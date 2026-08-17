@@ -1,0 +1,5 @@
+.bring-option--shop .bring-option__dot { background:#d7dce2; }
+.bring-option--shop input:checked + .bring-option__dot { background:#7b8794; }
+.bring-filter--shop.is-active { background:#7b8794; border-color:#7b8794; color:#fff; }
+.bring-card--shop { background:#f7f8fa !important; border-color:#dfe3e8; }
+.bring-card--shop::before { background:#7b8794; }

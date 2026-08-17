@@ -26,7 +26,7 @@
     const sort = getSort();
     const dir = getDir() === 'desc' ? -1 : 1;
     cards.sort((a, b) => {
-      let result = 0;
+      let result;
       if (sort === 'name') {
         result = (a.querySelector('h3')?.textContent || '').localeCompare(b.querySelector('h3')?.textContent || '', 'hu');
       } else {
@@ -46,6 +46,14 @@
     const desc = getDir() === 'desc';
     button.textContent = desc ? '↓' : '↑';
     button.setAttribute('aria-label', desc ? 'Fordított sorrend' : 'Növekvő sorrend');
+  }
+
+  function bindFilterSort() {
+    document.querySelectorAll('[data-bring-filter]').forEach(button => {
+      if (button.dataset.sortBound === '1') return;
+      button.dataset.sortBound = '1';
+      button.addEventListener('click', () => window.setTimeout(sortCards, 0));
+    });
   }
 
   function ensureControls() {
@@ -77,22 +85,25 @@
     const select = controls.querySelector('#bring-sort-select');
     if (select) select.value = getSort();
     updateDirectionButton();
+    bindFilterSort();
     sortCards();
   }
 
-  function refreshAfterNavigation() {
-    window.setTimeout(() => { ensureControls(); }, 0);
+  function installShowHook() {
+    if (!window.BringList || typeof window.BringList.show !== 'function' || window.BringList.show.__sortWrapped) return;
+    const originalShow = window.BringList.show;
+    const wrappedShow = function () {
+      const result = originalShow.apply(this, arguments);
+      window.setTimeout(ensureControls, 0);
+      return result;
+    };
+    wrappedShow.__sortWrapped = true;
+    window.BringList.show = wrappedShow;
   }
 
-  document.addEventListener('click', event => {
-    if (event.target.closest('.bottom-nav-item[data-view="menu"]') || event.target.closest('[data-bring-filter]')) {
-      refreshAfterNavigation();
-    }
-  });
-
   document.addEventListener('DOMContentLoaded', () => {
-    ensureControls();
-    // The main bring-list renderer runs on the same DOMContentLoaded cycle.
-    window.setTimeout(ensureControls, 50);
+    // bring-list.js is loaded immediately before this file and exposes BringList during DOMContentLoaded.
+    window.setTimeout(installShowHook, 0);
+    window.setTimeout(ensureControls, 80);
   });
 })();

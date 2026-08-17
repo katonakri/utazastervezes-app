@@ -1,0 +1,15 @@
+/* Program szerkesztő */
+.program-edit-backdrop { position:fixed; inset:0; background:rgba(15,23,42,.42); z-index:1000; }
+.program-edit-modal { position:fixed; z-index:1001; inset:0; margin:auto; width:min(620px,calc(100% - 24px)); max-height:min(90vh,760px); overflow:auto; background:var(--color-surface,#fff); border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.22); }
+.program-edit-header { position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:10px; padding:14px 16px; background:inherit; border-bottom:1px solid var(--color-border,#e8eaed); }
+.program-edit-header button { width:34px; height:34px; border:0; border-radius:9px; background:transparent; font-size:28px; line-height:1; }
+.program-edit-kicker { font-size:11px; color:var(--color-text-secondary,#737980); font-weight:700; }
+.program-edit-header h2 { margin:2px 0 0; font-size:18px; line-height:1.2; }
+.program-edit-form { display:flex; flex-direction:column; gap:12px; padding:14px 16px 20px; }
+.program-edit-form label { display:flex; flex-direction:column; gap:5px; font-size:12px; font-weight:700; color:var(--color-text-secondary,#666); }
+.program-edit-form input,.program-edit-form textarea,.program-edit-form select { width:100%; box-sizing:border-box; border:1px solid var(--color-border,#ddd); border-radius:10px; padding:10px 11px; background:#fff; color:var(--color-text,#222); font:inherit; font-size:14px; }
+.program-edit-form textarea { min-height:90px; resize:vertical; }
+.program-edit-save { order:-1; width:100%; min-height:42px; border:0; border-radius:11px; background:var(--color-primary,#2e9e5b); color:#fff; font-size:14px; font-weight:800; }
+.program-edit-save:disabled { opacity:.6; }
+.program-edit-trigger { width:100%; margin-top:16px; min-height:40px; border:1px solid var(--color-border,#ddd); border-radius:10px; background:var(--color-surface,#fff); color:var(--color-text,#222); font-weight:700; }
+@media(max-width:600px){ .program-edit-modal { width:100%; max-height:100dvh; border-radius:16px 16px 0 0; top:auto; bottom:0; } }

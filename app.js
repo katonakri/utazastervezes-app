@@ -280,7 +280,7 @@ function renderProgramList() {
   const el = document.getElementById('program-list');
   const list = getSortedPrograms();
   if (!list.length) {
-    el.innerHTML = `<div class="empty-state">${icon('grid', { size: 34 })}<p>Ebben a kategóriában egyelőre nincs program.</p></div>`;
+    el.innerHTML = `<div class="empty-state">${icon('grid', { size: 34 })}<p>Ebben a kategóriában egyelőre nincs program.</p>`;
     return;
   }
   el.innerHTML = list.map(cardTemplate).join('');
@@ -370,12 +370,24 @@ function switchView(view) {
   const categoryBar = document.getElementById('category-bar');
   const placeholder = document.getElementById('placeholder-view');
   if (view === 'programok') {
+    document.querySelector('.app-title').textContent = 'Noszvaj és környéke';
     programList.classList.remove('hidden'); sortBar.classList.remove('hidden'); categoryBar.classList.remove('hidden'); placeholder.classList.add('hidden');
+  } else if (view === 'tervezett') {
+    programList.classList.add('hidden'); sortBar.classList.add('hidden'); categoryBar.classList.add('hidden');
+    document.querySelector('.app-title').textContent = 'Programtervező';
+    if (typeof window.renderPlannerView === 'function') {
+      window.renderPlannerView();
+    } else {
+      placeholder.innerHTML = `${icon('calendar', { size: 44 })}<h2>Programtervező</h2><p>A programtervező betöltése nem sikerült.</p>`;
+      placeholder.classList.remove('hidden');
+    }
   } else {
+    document.querySelector('.app-title').textContent = 'Noszvaj és környéke';
     programList.classList.add('hidden'); sortBar.classList.add('hidden'); categoryBar.classList.add('hidden');
     const content = PLACEHOLDER_CONTENT[view];
     placeholder.innerHTML = `${icon(content.icon, { size: 44 })}<h2>${content.title}</h2><p>${content.text}</p>`;
     placeholder.classList.remove('hidden');
+    if (typeof window.leavePlannerView === 'function') window.leavePlannerView();
   }
 }
 

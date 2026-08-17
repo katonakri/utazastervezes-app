@@ -1,0 +1,24 @@
+/* Card click opens editing; deletion is handled from the edit sheet. */
+.bring-card__menu { display: none !important; }
+.bring-delete-top {
+  margin-left: auto;
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #f0c7c7;
+  border-radius: 9px;
+  background: #fff6f6;
+  color: #c53d3d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 800;
+}
+.bring-delete-top:disabled { opacity: .55; }
+.bring-delete-top__icon { font-size: 14px; line-height: 1; }
+@media (max-width: 600px) {
+  .bring-delete-top { min-height: 32px; padding: 0 9px; }
+}

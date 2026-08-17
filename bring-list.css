@@ -81,6 +81,8 @@
 .bring-preview .bring-card { box-shadow:none; }
 .bring-preview .bring-card__menu { display:none; }
 .bring-save { width:100%; margin-top:16px; min-height:48px; border-radius:12px; background:var(--color-primary); color:#fff; font-weight:800; }
+.bring-modal__header .bring-save--top { width:auto; min-width:86px; min-height:40px; margin:0 0 0 auto; padding:0 14px; border-radius:10px; font-size:.8rem; flex:0 0 auto; }
+.bring-modal__header .bring-delete-top { margin-left:6px; min-height:40px; padding:0 11px; border:1px solid #f0caca; border-radius:10px; background:#fff5f5; color:#c53b3b; font-size:.78rem; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:5px; flex:0 0 auto; }
 
 @media (min-width:720px) {
   .bring-add { right:max(24px, calc((100vw - var(--content-max))/2 - 12px)); bottom:88px; }

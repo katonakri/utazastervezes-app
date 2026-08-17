@@ -1,38 +1,50 @@
+/* Mit hozzunk? — client-side sorting for the rendered list. */
 (() => {
-  const DEFAULT_SORT = 'assignee';
   const SORT_KEY = 'bring_list_sort';
-  const ORDER_KEY = 'bring_list_sort_order';
+  const DIR_KEY = 'bring_list_sort_direction';
+  const RANK = { 'Deli és Peti': 1, 'Tina és Kristóf': 2, 'Ármin': 3, 'Ott vesszük': 4, 'Még senki': 99 };
+  let sorting = false;
 
-  function sortItems(items) {
-    const sort = localStorage.getItem(SORT_KEY) || DEFAULT_SORT;
-    const direction = localStorage.getItem(ORDER_KEY) === 'desc' ? -1 : 1;
-    const groupOrder = { Deli: 1, Tina: 2, Ármin: 3 };
-    const labelFor = item => {
-      const a = item.assignees || [];
-      if (!a.length) return { rank: 99, label: 'Nincs gazda' };
-      if (a.includes('Deli') || a.includes('Peti')) return { rank: 1, label: 'Deli és Peti' };
-      if (a.includes('Tina') || a.includes('Kristóf')) return { rank: 2, label: 'Tina és Kristóf' };
-      if (a.includes('Ármin')) return { rank: 3, label: 'Ármin' };
-      if (a.includes('Ott vesszük')) return { rank: 4, label: 'Ott vesszük' };
-      return { rank: 98, label: a.join(', ') };
-    };
-    return [...items].sort((a,b) => {
-      if (sort === 'name') return direction * String(a.name || '').localeCompare(String(b.name || ''), 'hu');
-      if (sort === 'created') return direction * (new Date(a.created_at || 0) - new Date(b.created_at || 0));
-      const aa = labelFor(a), bb = labelFor(b);
-      return direction * (aa.rank - bb.rank || aa.label.localeCompare(bb.label, 'hu') || String(a.name).localeCompare(String(b.name), 'hu'));
+  function currentSort() { return localStorage.getItem(SORT_KEY) || 'assignee'; }
+  function currentDir() { return localStorage.getItem(DIR_KEY) === 'desc' ? -1 : 1; }
+  function assigneeLabel(card) { return card.querySelector('.bring-assignee')?.textContent?.trim() || 'Még senki'; }
+
+  function sortCards() {
+    const list = document.getElementById('bring-list');
+    if (!list || sorting) return;
+    const cards = [...list.querySelectorAll(':scope > .bring-card[data-bring-id]')];
+    if (cards.length < 2) return;
+    const sort = currentSort(), dir = currentDir();
+    cards.sort((a, b) => {
+      if (sort === 'name') return dir * (a.querySelector('h3')?.textContent || '').localeCompare(b.querySelector('h3')?.textContent || '', 'hu');
+      const al = assigneeLabel(a), bl = assigneeLabel(b);
+      return dir * ((RANK[al] ?? 98) - (RANK[bl] ?? 98) || al.localeCompare(bl, 'hu') || (a.querySelector('h3')?.textContent || '').localeCompare(b.querySelector('h3')?.textContent || '', 'hu'));
     });
+    sorting = true;
+    const fragment = document.createDocumentFragment();
+    cards.forEach(card => fragment.appendChild(card));
+    list.appendChild(fragment);
+    sorting = false;
   }
 
-  window.BringListSort = { sortItems };
-
-  const originalRenderList = window.renderBringList;
-  // The feature is integrated by wrapping the existing list renderer when available.
-  function integrate() {
-    if (typeof originalRenderList !== 'function') return;
-    if (window.__bringSortIntegrated) return;
-    window.__bringSortIntegrated = true;
-    window.renderBringList = function(items) { return originalRenderList(sortItems(items)); };
+  function ensureControls() {
+    const filters = document.querySelector('.bring-filters');
+    if (!filters || document.querySelector('.bring-sort')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'bring-sort';
+    wrap.innerHTML = '<label for="bring-sort-select">Rendezés:</label><select id="bring-sort-select" aria-label="Lista rendezése"><option value="assignee">Ki hozza?</option><option value="name">Megnevezés</option></select><button id="bring-sort-direction" type="button" aria-label="Rendezési irány megfordítása">↕</button>';
+    filters.insertAdjacentElement('afterend', wrap);
+    const select = wrap.querySelector('select');
+    select.value = currentSort();
+    select.addEventListener('change', () => { localStorage.setItem(SORT_KEY, select.value); sortCards(); });
+    wrap.querySelector('button').addEventListener('click', () => { localStorage.setItem(DIR_KEY, currentDir() === 1 ? 'desc' : 'asc'); sortCards(); });
   }
-  integrate();
+
+  function refresh() { ensureControls(); sortCards(); }
+  document.addEventListener('DOMContentLoaded', refresh);
+  const observer = new MutationObserver(() => requestAnimationFrame(refresh));
+  document.addEventListener('DOMContentLoaded', () => {
+    const host = document.getElementById('placeholder-view');
+    if (host) observer.observe(host, { childList: true, subtree: true });
+  });
 })();

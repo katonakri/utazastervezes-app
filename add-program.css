@@ -1,0 +1,46 @@
+/* Program hozzáadás / szerkesztés */
+.header-content { position: relative; }
+.add-program-btn { margin-left:auto; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:38px; padding:0 13px; border:0; border-radius:10px; background:var(--color-primary); color:#fff; font:700 13px/1 var(--font-sans); cursor:pointer; box-shadow:0 2px 6px rgba(16,24,40,.12); }
+.add-program-btn:hover { background:var(--color-primary-dark); }
+.add-program-btn.is-hidden { display:none !important; }
+.add-program-plus { font-size:21px; line-height:16px; font-weight:500; }
+.add-program-label { white-space:nowrap; }
+.program-editor-modal { position:fixed; inset:0; z-index:3000; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(15,23,42,.45); }
+.program-editor-modal.hidden { display:none; }
+.program-editor-panel { width:min(760px,100%); max-height:calc(100vh - 32px); overflow:auto; background:#fff; border-radius:18px; box-shadow:0 18px 60px rgba(0,0,0,.22); }
+.program-editor-header { position:sticky; top:0; z-index:2; display:flex; justify-content:space-between; gap:16px; padding:18px 20px; background:#fff; border-bottom:1px solid var(--color-border); }
+.program-editor-header h2 { margin:0; font-size:20px; }
+.program-editor-header p { margin:5px 0 0; color:var(--color-text-secondary); font-size:12px; }
+.program-editor-close { width:34px; height:34px; border:0; border-radius:9px; background:#f2f4f7; font-size:23px; cursor:pointer; flex:0 0 auto; }
+.program-editor-form { padding:4px 20px 20px; }
+.program-editor-form section { padding:16px 0; border-bottom:1px solid var(--color-border); }
+.program-editor-form h3 { margin:0 0 12px; font-size:14px; }
+.program-editor-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.program-editor-field { min-width:0; }
+.program-editor-field--full { grid-column:1 / -1; }
+.program-editor-field label { display:block; margin:0 0 6px; font-size:12px; font-weight:700; }
+.program-editor-field label span { color:var(--color-text-tertiary); font-weight:500; }
+.program-editor-field input,.program-editor-field select,.program-editor-field textarea { width:100%; border:1px solid var(--color-border-strong); border-radius:9px; padding:10px 11px; background:#fff; color:var(--color-text); font:500 13px var(--font-sans); outline:none; }
+.program-editor-field input:focus,.program-editor-field select:focus,.program-editor-field textarea:focus { border-color:var(--color-primary); box-shadow:0 0 0 3px var(--color-primary-tint); }
+.program-editor-field textarea { min-height:82px; resize:vertical; }
+.program-editor-help { margin:8px 0 0; color:var(--color-text-tertiary); font-size:11px; line-height:1.45; }
+.program-editor-status { min-height:18px; margin:12px 0 0; color:var(--color-text-secondary); font-size:12px; }
+.program-editor-actions { position:sticky; bottom:0; display:flex; justify-content:flex-end; gap:8px; padding:14px 0 0; background:#fff; }
+.program-editor-actions button { min-height:40px; border:0; border-radius:10px; padding:0 15px; font-weight:700; cursor:pointer; }
+.program-editor-cancel { background:#f2f4f7; color:var(--color-text); }
+.program-editor-save { background:var(--color-primary); color:#fff; }
+.program-editor-save:disabled { opacity:.6; cursor:wait; }
+.program-edit-detail-btn { cursor:pointer; }
+@media (max-width:600px) {
+  .add-program-btn { width:38px; height:38px; min-height:38px; padding:0; border-radius:10px; gap:0; }
+  .add-program-label { display:none; }
+  .add-program-plus { font-size:25px; line-height:1; }
+  .program-editor-modal { padding:0; align-items:flex-end; }
+  .program-editor-panel { max-height:94vh; border-radius:18px 18px 0 0; }
+  .program-editor-grid { grid-template-columns:1fr; }
+  .program-editor-field--full { grid-column:auto; }
+  .program-editor-form { padding-left:16px; padding-right:16px; }
+  .program-editor-header { padding:16px; }
+  .program-editor-actions { padding-bottom:calc(8px + env(safe-area-inset-bottom)); }
+  .program-edit-detail-btn { width:100%; }
+}

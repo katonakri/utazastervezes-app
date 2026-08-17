@@ -1,10 +1,10 @@
-/* Mit hozzunk? — kártya szerkesztés/törlés, prompt nélkül */
+/* Mit hozzunk? — közvetlen kártya-szerkesztés és kuka */
 (() => {
   const TRASH_PATH = '<path d="M5 7h14"/><path d="M9 7V5h6v2"/><path d="M7 7l1 13h8l1-13"/><path d="M10 10v7M14 10v7"/>';
   try { Object.assign(ICON_PATHS, { trash: TRASH_PATH }); } catch (e) {}
 
-  function enhanceCards(root = document) {
-    root.querySelectorAll('.bring-card[data-bring-id]').forEach(card => {
+  function enhanceCards() {
+    document.querySelectorAll('.bring-card[data-bring-id]').forEach(card => {
       const button = card.querySelector('.bring-card__menu');
       if (!button || button.dataset.enhanced === '1') return;
       button.dataset.enhanced = '1';
@@ -16,18 +16,15 @@
     });
   }
 
-  function getItem(card) {
+  async function deleteItem(card) {
     const id = card?.dataset?.bringId;
-    return window.BringList?.getItems?.().find(x => String(x.id) === String(id));
-  }
-
-  async function deleteItem(item) {
-    if (!item) return;
-    if (!window.confirm(`Biztosan törlöd ezt: „${item.name}”?`)) return;
+    const name = card?.querySelector('h3')?.textContent?.trim() || 'ezt az elemet';
+    if (!id) return;
+    if (!window.confirm(`Biztosan törlöd ezt: „${name}”?`)) return;
     try {
-      const { error } = await supabase.from('bring_items').delete().eq('id', item.id);
+      const { error } = await supabase.from('bring_items').delete().eq('id', id);
       if (error) throw error;
-      window.BringList?.reload?.();
+      if (window.BringList?.show) window.BringList.show();
     } catch (error) {
       console.error('Mit hozzunk? törlési hiba', error);
       window.alert('Az elem törlése nem sikerült.');
@@ -39,8 +36,7 @@
     if (trash) {
       event.preventDefault();
       event.stopPropagation();
-      const card = trash.closest('.bring-card');
-      deleteItem(getItem(card));
+      deleteItem(trash.closest('.bring-card'));
       return;
     }
 
@@ -65,7 +61,7 @@
   const observer = new MutationObserver(() => enhanceCards());
   document.addEventListener('DOMContentLoaded', () => {
     enhanceCards();
-    const list = document.getElementById('placeholder-view');
-    if (list) observer.observe(list, { childList: true, subtree: true });
+    const host = document.getElementById('placeholder-view');
+    if (host) observer.observe(host, { childList: true, subtree: true });
   });
 })();

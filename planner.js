@@ -155,16 +155,6 @@
     renderPlanner();
   }
 
-  async function removeProgram(programId) {
-    const { error } = await supabase
-      .from('program_plan_items')
-      .delete()
-      .eq('program_id', Number(programId));
-    if (error) throw error;
-    await loadPlan();
-    renderPlanner();
-  }
-
   function handleDrop(programId, date, period) {
     moveProgram(programId, date, period).catch((error) => {
       console.error('Programtervező mentési hiba:', error);
@@ -201,15 +191,6 @@
       });
     });
 
-    root.querySelectorAll('.planner-scheduled').forEach((el) => {
-      el.addEventListener('dblclick', () => removeProgram(el.dataset.programId).catch(() => {}));
-      el.addEventListener('dragstart', (event) => {
-        event.dataTransfer.effectAllowed = 'move';
-        event.dataTransfer.setData('text/plain', el.dataset.programId);
-        el.classList.add('is-dragging');
-      });
-    });
-
     // Pointer Events fallback for touch devices. Uses pointer capture so the
     // drag remains attached to the finger while crossing the horizontal grid.
     root.querySelectorAll('[draggable="true"]').forEach((el) => {
@@ -224,6 +205,7 @@
           startX: event.clientX,
           startY: event.clientY,
           active: false,
+          isTopItem: el.classList.contains('planner-top-item'),
           ghost: null,
         };
         el.setPointerCapture(event.pointerId);
@@ -234,6 +216,11 @@
         const dx = event.clientX - pointerDrag.startX;
         const dy = event.clientY - pointerDrag.startY;
         if (!pointerDrag.active && Math.hypot(dx, dy) < 8) return;
+        if (!pointerDrag.active && pointerDrag.isTopItem && Math.abs(dx) > Math.abs(dy) + 4) {
+          try { el.releasePointerCapture(event.pointerId); } catch (e) {}
+          pointerDrag = null;
+          return;
+        }
         if (!pointerDrag.active) {
           pointerDrag.active = true;
           event.preventDefault();

@@ -1,17 +1,13 @@
 /* Mit hozzunk? — card interaction polish. No observers, no polling. */
 (() => {
-  let syntheticAction = null;
-
   function runMenuAction(card, action) {
     const menu = card?.querySelector('[data-bring-action="menu"]');
     if (!menu) return;
-    syntheticAction = action;
     const originalPrompt = window.prompt;
     window.prompt = () => action === 'edit' ? '1' : '2';
-    try { menu.click(); } finally {
-      window.prompt = originalPrompt;
-      syntheticAction = null;
-    }
+    try { menu.click(); } finally { window.prompt = originalPrompt; }
+    if (action === 'edit') setTimeout(cleanupModal, 0);
+    if (action === 'delete') setTimeout(addTrashButtons, 50);
   }
 
   function addTrashButtons() {
@@ -30,13 +26,13 @@
     const form = document.querySelector('#bring-modal-host .bring-form');
     const save = document.getElementById('bring-save');
     if (!form || !save) return;
-    const previewLabel = form.querySelector('.bring-preview-label');
-    const preview = form.querySelector('#bring-preview');
-    previewLabel?.remove();
-    preview?.remove();
+    form.querySelector('.bring-preview-label')?.remove();
+    form.querySelector('#bring-preview')?.remove();
     save.classList.add('bring-save--top');
-    form.insertBefore(save, form.firstElementChild);
+    if (form.firstElementChild !== save) form.insertBefore(save, form.firstElementChild);
   }
+
+  function cleanupModal() { moveSaveToTopAndRemovePreview(); }
 
   document.addEventListener('click', (event) => {
     const deleteButton = event.target.closest('.bring-card__delete');
@@ -51,29 +47,19 @@
     if (card && !event.target.closest('[data-bring-action="menu"]')) {
       event.preventDefault();
       runMenuAction(card, 'edit');
+      return;
     }
+
+    if (event.target.closest('[data-bring-filter]')) setTimeout(addTrashButtons, 0);
+    if (event.target.closest('#bring-add')) setTimeout(cleanupModal, 0);
   }, false);
 
-  const originalPrompt = window.prompt;
-  // The main bring-list implementation uses a prompt for its legacy menu.
-  // Synthetic card actions replace that prompt only for the duration of the action.
-  function cleanupModal() {
-    moveSaveToTopAndRemovePreview();
-  }
-
-  document.addEventListener('click', (event) => {
-    if (event.target.closest('#bring-add') || event.target.closest('#bring-save')) {
-      setTimeout(cleanupModal, 0);
-    }
-  }, false);
-
-  // Re-rendering is explicit in the existing bring-list implementation, so a lightweight
-  // hook on the public show method is sufficient; no DOM observer is used.
   const originalShow = window.BringList?.show;
   if (originalShow && !originalShow.__actionsV3) {
     const wrappedShow = function () {
       const result = originalShow.apply(this, arguments);
-      setTimeout(addTrashButtons, 0);
+      setTimeout(addTrashButtons, 150);
+      setTimeout(addTrashButtons, 600);
       return result;
     };
     wrappedShow.__actionsV3 = true;
@@ -81,7 +67,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(addTrashButtons, 100);
-    setTimeout(cleanupModal, 100);
+    setTimeout(addTrashButtons, 150);
+    setTimeout(cleanupModal, 150);
   });
 })();

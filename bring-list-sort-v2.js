@@ -3,7 +3,7 @@
   const SORT_KEY = 'bring_list_sort_v2';
   const DIR_KEY = 'bring_list_sort_dir_v2';
   const DEFAULT_SORT = 'assignee';
-  const DEFAULT_DIR = 'asc';
+  const DEFAULT_DIR = 'desc';
 
   function getSort() { try { return localStorage.getItem(SORT_KEY) || DEFAULT_SORT; } catch { return DEFAULT_SORT; } }
   function getDir() { try { return localStorage.getItem(DIR_KEY) || DEFAULT_DIR; } catch { return DEFAULT_DIR; } }
@@ -65,25 +65,14 @@
       controls = document.createElement('div');
       controls.id = 'bring-sort-controls';
       controls.className = 'bring-sort-controls';
-      controls.innerHTML = `
-        <label for="bring-sort-select">Rendezés:</label>
-        <select id="bring-sort-select" aria-label="Lista rendezése">
-          <option value="assignee">Ki hozza?</option>
-          <option value="name">Megnevezés</option>
-        </select>
-        <button id="bring-sort-direction" type="button" aria-label="Növekvő sorrend">↑</button>`;
+      controls.innerHTML = `<label for="bring-sort-select">Rendezés:</label><select id="bring-sort-select" aria-label="Lista rendezése"><option value="assignee">Ki hozza?</option><option value="name">Megnevezés</option></select><button id="bring-sort-direction" type="button" aria-label="Csökkenő sorrend">↓</button>`;
       filters.insertAdjacentElement('afterend', controls);
       const select = controls.querySelector('#bring-sort-select');
       select.value = getSort();
       select.addEventListener('change', () => { save(SORT_KEY, select.value); sortCards(); });
-      controls.querySelector('#bring-sort-direction').addEventListener('click', () => {
-        save(DIR_KEY, getDir() === 'desc' ? 'asc' : 'desc');
-        updateDirectionButton();
-        sortCards();
-      });
+      controls.querySelector('#bring-sort-direction').addEventListener('click', () => { save(DIR_KEY, getDir() === 'desc' ? 'asc' : 'desc'); updateDirectionButton(); sortCards(); });
     }
-    const select = controls.querySelector('#bring-sort-select');
-    if (select) select.value = getSort();
+    controls.querySelector('#bring-sort-select').value = getSort();
     updateDirectionButton();
     bindFilterSort();
     sortCards();
@@ -92,18 +81,10 @@
   function installShowHook() {
     if (!window.BringList || typeof window.BringList.show !== 'function' || window.BringList.show.__sortWrapped) return;
     const originalShow = window.BringList.show;
-    const wrappedShow = function () {
-      const result = originalShow.apply(this, arguments);
-      window.setTimeout(ensureControls, 0);
-      return result;
-    };
+    const wrappedShow = function () { const result = originalShow.apply(this, arguments); window.setTimeout(ensureControls, 0); return result; };
     wrappedShow.__sortWrapped = true;
     window.BringList.show = wrappedShow;
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // bring-list.js is loaded immediately before this file and exposes BringList during DOMContentLoaded.
-    window.setTimeout(installShowHook, 0);
-    window.setTimeout(ensureControls, 80);
-  });
+  document.addEventListener('DOMContentLoaded', () => { window.setTimeout(installShowHook, 0); window.setTimeout(ensureControls, 80); });
 })();

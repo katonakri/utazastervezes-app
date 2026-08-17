@@ -182,7 +182,8 @@
     document.querySelector('.program-list')?.classList.add('hidden');
     document.getElementById('category-bar')?.classList.add('hidden');
     document.querySelector('.sort-bar')?.classList.add('hidden');
-    document.querySelector('.app-title').textContent = 'Programtervező';
+    const title = document.querySelector('.app-title');
+    if (title) title.textContent = 'Programtervező';
     document.querySelectorAll('.bottom-nav-item').forEach((item) => item.classList.toggle('is-active', item.dataset.view === 'tervezett'));
     const placeholder = document.getElementById('placeholder-view');
     if (!placeholder) return;
@@ -201,15 +202,47 @@
     plannerOpen = false;
     const title = document.querySelector('.app-title');
     if (title) title.textContent = 'Noszvaj és környéke';
-    const placeholder = document.getElementById('placeholder-view');
-    if (placeholder) {
-      placeholder.className = 'placeholder-view';
-      if (state.currentView === 'programok') placeholder.classList.add('hidden');
-    }
   }
 
-  // Navigation is intentionally owned by app.js. This module only exposes
-  // the planner renderer and does not register competing nav listeners.
+  /*
+   * Navigation fix:
+   * app.js has the generic bubble-phase handler, while some other views
+   * intentionally handle navigation in capture phase. The planner therefore
+   * handles only the planner click in capture phase, and never intercepts
+   * other tabs. A MutationObserver keeps the header title synchronized even
+   * when another view stops propagation before app.js can run.
+   */
+  document.addEventListener('click', (event) => {
+    const nav = event.target.closest('.bottom-nav-item');
+    if (!nav || nav.dataset.view !== 'tervezett') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    state.currentView = 'tervezett';
+    activatePlanner();
+  }, true);
+
+  const NAV_TITLES = {
+    programok: 'Noszvaj és környéke',
+    kedvencek: 'Kedvencek',
+    tervezett: 'Programtervező',
+    info: 'Infók',
+    menu: 'Mit hozzunk?',
+  };
+
+  function syncHeaderWithActiveNav() {
+    const active = document.querySelector('.bottom-nav-item.is-active');
+    const view = active?.dataset.view;
+    const title = document.querySelector('.app-title');
+    if (title && view && NAV_TITLES[view]) title.textContent = NAV_TITLES[view];
+  }
+
+  const navObserver = new MutationObserver(syncHeaderWithActiveNav);
+  navObserver.observe(document.getElementById('bottom-nav') || document.body, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class', 'aria-current'],
+  });
+
   window.renderPlannerView = activatePlanner;
   window.leavePlannerView = restoreHeaderForOtherView;
 })();

@@ -5,27 +5,6 @@
   const ADD_BUTTON_ID = 'add-program-btn';
   const MODAL_ID = 'add-program-modal';
 
-  const fields = [
-    ['title', 'Program neve', 'text'],
-    ['category', 'Kategória', 'select'],
-    ['description', 'Rövid leírás', 'textarea'],
-    ['image_url', 'Kép URL-je', 'url'],
-    ['distance_km', 'Távolság (km)', 'number'],
-    ['drive_minutes', 'Autóval (perc)', 'number'],
-    ['duration', 'Időtartam', 'text'],
-    ['duration_hours_min', 'Időtartam órában', 'number'],
-    ['price', 'Kártyán megjelenő ár', 'text'],
-    ['price_adult', 'Felnőtt ár', 'text'],
-    ['price_child_2', '2 éves gyermek ára', 'text'],
-    ['price_sort_value', 'Ár szerinti rendezés értéke', 'number'],
-    ['google_rating', 'Google értékelés', 'number'],
-    ['google_review_count', 'Google értékelések száma', 'number'],
-    ['google_maps_url', 'Google Maps link', 'url'],
-    ['official_url', 'Hivatalos / további infó link', 'url'],
-    ['latitude', 'Szélesség (latitude)', 'number'],
-    ['longitude', 'Hosszúság (longitude)', 'number'],
-  ];
-
   function esc(value) {
     return String(value ?? '').replace(/[&<>"']/g, (c) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -38,8 +17,7 @@
       .join('');
   }
 
-  function fieldHtml(name, label, type) {
-    const required = ['title', 'category', 'description', 'distance_km', 'drive_minutes', 'duration', 'duration_hours_min', 'price', 'google_maps_url', 'latitude', 'longitude'].includes(name);
+  function fieldHtml(name, label, type, required = false, full = false) {
     const requiredMark = required ? '' : ' <span>(opcionális)</span>';
     const attrs = [
       `id="add-${name}"`,
@@ -62,7 +40,7 @@
     } else {
       control = `<input ${attrs} autocomplete="off" />`;
     }
-    return `<div class="add-program-field ${name === 'description' || name === 'image_url' || name === 'google_maps_url' || name === 'official_url' ? 'add-program-field--full' : ''}"><label for="add-${name}">${esc(label)}${requiredMark}</label>${control}</div>`;
+    return `<div class="add-program-field ${full ? 'add-program-field--full' : ''}"><label for="add-${name}">${esc(label)}${requiredMark}</label>${control}</div>`;
   }
 
   function createModal() {
@@ -83,43 +61,43 @@
           <section class="add-program-section">
             <h3 class="add-program-section-title">Alapadatok</h3>
             <div class="add-program-grid">
-              ${fieldHtml('title', 'Program neve', 'text')}
-              ${fieldHtml('category', 'Kategória', 'select')}
-              ${fieldHtml('description', 'Rövid leírás', 'textarea')}
-              ${fieldHtml('image_url', 'Kép URL-je', 'url')}
+              ${fieldHtml('title', 'Program neve', 'text', true)}
+              ${fieldHtml('category', 'Kategória', 'select', true)}
+              ${fieldHtml('description', 'Rövid leírás', 'textarea', true, true)}
+              ${fieldHtml('image_url', 'Kép URL-je', 'url', false, true)}
             </div>
           </section>
           <section class="add-program-section">
             <h3 class="add-program-section-title">Távolság és idő</h3>
             <div class="add-program-grid">
-              ${fieldHtml('distance_km', 'Távolság (km)', 'number')}
-              ${fieldHtml('drive_minutes', 'Autóval (perc)', 'number')}
-              ${fieldHtml('duration', 'Időtartam', 'text')}
-              ${fieldHtml('duration_hours_min', 'Időtartam órában', 'number')}
+              ${fieldHtml('distance_km', 'Távolság (km)', 'number', true)}
+              ${fieldHtml('drive_minutes', 'Autóval (perc)', 'number', true)}
+              ${fieldHtml('duration', 'Időtartam', 'text', true)}
+              ${fieldHtml('duration_hours_min', 'Időtartam órában', 'number', true)}
             </div>
-            <p class="add-program-help">Az „Időtartam órában” csak a rövid/közepes/hosszú jelöléshez és a rendezéshez kell, pl. 1,5 vagy 3.</p>
+            <p class="add-program-help">Pl. „1–2 óra” és 1,5. Az órában megadott érték a program hosszának jelöléséhez szükséges.</p>
           </section>
           <section class="add-program-section">
             <h3 class="add-program-section-title">Árak és értékelés</h3>
             <div class="add-program-grid">
-              ${fieldHtml('price', 'Kártyán megjelenő ár', 'text')}
+              ${fieldHtml('price', 'Kártyán megjelenő ár', 'text', true)}
               ${fieldHtml('price_adult', 'Felnőtt ár', 'text')}
               ${fieldHtml('price_child_2', '2 éves gyermek ára', 'text')}
               ${fieldHtml('price_sort_value', 'Ár szerinti rendezés értéke', 'number')}
               ${fieldHtml('google_rating', 'Google értékelés', 'number')}
               ${fieldHtml('google_review_count', 'Google értékelések száma', 'number')}
             </div>
-            <p class="add-program-help">Az ár szerinti rendezéshez adj meg egy összehasonlítható numerikus értéket, általában a legfontosabb / felnőtt belépő árát forintban.</p>
+            <p class="add-program-help">Az ár szerinti rendezéshez adj meg egy numerikus értéket, általában a felnőtt belépő árát forintban. Ha üres, a rendszer megpróbálja kiolvasni a felnőtt árból.</p>
           </section>
           <section class="add-program-section">
             <h3 class="add-program-section-title">Helyszín és linkek</h3>
             <div class="add-program-grid">
-              ${fieldHtml('google_maps_url', 'Google Maps link', 'url')}
-              ${fieldHtml('official_url', 'Hivatalos / további infó link', 'url')}
+              ${fieldHtml('google_maps_url', 'Google Maps link', 'url', true, true)}
+              ${fieldHtml('official_url', 'Hivatalos / további infó link', 'url', false, true)}
               ${fieldHtml('latitude', 'Szélesség (latitude)', 'number')}
               ${fieldHtml('longitude', 'Hosszúság (longitude)', 'number')}
             </div>
-            <p class="add-program-help">A latitude és longitude a Térkép nézetben való pinhez szükséges. Google Mapsből kimásolható koordinátaként.</p>
+            <p class="add-program-help">A koordináták opcionálisak, de a Térkép nézetben csak ezekkel jelenik meg pin. Google Mapsből kimásolhatóak.</p>
           </section>
           <p class="add-program-status" id="add-program-status" role="status" aria-live="polite"></p>
           <div class="add-program-actions">
@@ -192,7 +170,6 @@
     const payload = {
       title: value('title'),
       category: value('category'),
-      icon: null,
       image_url: value('image_url') || null,
       description: value('description') || null,
       distance_km: num('distance_km'),
@@ -218,7 +195,6 @@
 
       state.programs = await DataStore.getPrograms();
       renderProgramList();
-      if (typeof window.refreshProgramMapMarkers === 'function') window.refreshProgramMapMarkers();
       setStatus('A program sikeresen hozzáadva.', true);
       form.reset();
       setTimeout(closeModal, 700);
@@ -239,7 +215,7 @@
   function init() {
     const button = document.getElementById(ADD_BUTTON_ID);
     if (!button) return;
-    button.innerHTML = `${icon('plus', { size: 17 })}<span>Új program</span>`;
+    button.innerHTML = `<span aria-hidden="true">+</span><span>Új program</span>`;
     button.addEventListener('click', openModal);
     document.querySelectorAll('.bottom-nav-item').forEach((navButton) => navButton.addEventListener('click', () => setTimeout(updateButtonVisibility, 0)));
     updateButtonVisibility();

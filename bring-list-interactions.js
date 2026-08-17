@@ -48,13 +48,16 @@
     if (!menu) return;
     event.preventDefault();
     const oldPrompt = window.prompt;
+    const wasTrash = menu.dataset.bringTrash;
     try {
       window.prompt = () => '1';
+      delete menu.dataset.bringTrash;
       menu.setAttribute('data-bring-action', 'menu');
       menu.click();
     } finally {
       window.prompt = oldPrompt;
       menu.removeAttribute('data-bring-action');
+      if (wasTrash) menu.dataset.bringTrash = wasTrash;
     }
   }, true);
 

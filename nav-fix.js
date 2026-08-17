@@ -17,6 +17,13 @@
     if (title && TITLES[view]) title.textContent = TITLES[view];
   }
 
+  function hideMap() {
+    const map = document.getElementById('map-view');
+    if (map) map.classList.add('hidden');
+    const result = document.getElementById('map-result-sheet');
+    if (result) result.classList.remove('is-visible');
+  }
+
   function route(view, event) {
     setTitle(view);
 
@@ -25,6 +32,7 @@
 
     event.preventDefault();
     event.stopImmediatePropagation();
+    hideMap();
 
     if (view === 'tervezett' && typeof window.renderPlannerView === 'function') {
       window.renderPlannerView();

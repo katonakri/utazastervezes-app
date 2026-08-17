@@ -1,10 +1,10 @@
 /* Programtervező — isolated view module. Other views remain untouched. */
 (function () {
   const PLANNER_DATES = [
-    { key: '2026-08-20', label: '20. aug.', day: 'szerda' },
-    { key: '2026-08-21', label: '21. aug.', day: 'csütörtök' },
-    { key: '2026-08-22', label: '22. aug.', day: 'péntek' },
-    { key: '2026-08-23', label: '23. aug.', day: 'szombat' },
+    { key: '2026-08-20', label: '20. aug.', day: 'csütörtök' },
+    { key: '2026-08-21', label: '21. aug.', day: 'péntek' },
+    { key: '2026-08-22', label: '22. aug.', day: 'szombat' },
+    { key: '2026-08-23', label: '23. aug.', day: 'vasárnap' },
   ];
   const PERIODS = [
     { key: 'morning', label: 'Délelőtt', time: '09:00–13:00' },
@@ -65,6 +65,7 @@
   function renderPlanner() {
     const placeholder = document.getElementById('placeholder-view');
     if (!placeholder) return;
+
     placeholder.className = 'planner-view';
     placeholder.innerHTML = `
       <section class="planner-top-section">
@@ -117,7 +118,11 @@
   }
 
   async function loadPlan() {
-    const result = await supabase
+    if (!window.supabase || typeof window.supabase.from !== 'function') {
+      throw new Error('Supabase kliens nem érhető el.');
+    }
+
+    const result = await window.supabase
       .from('program_plan_items')
       .select('id, program_id, plan_date, period, position, created_by, created_at, updated_at')
       .order('plan_date', { ascending: true })
@@ -129,18 +134,19 @@
 
   async function moveProgram(programId, date, period) {
     if (isUnavailable(date, period)) return;
+
     const current = planItems.find((item) => Number(item.program_id) === Number(programId));
     const sameSlot = current && current.plan_date === date && current.period === period;
     if (sameSlot) return;
 
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await window.supabase
       .from('program_plan_items')
       .delete()
       .eq('program_id', programId);
     if (deleteError) throw deleteError;
 
     const nextPosition = slotItems(date, period).length;
-    const { error: insertError } = await supabase
+    const { error: insertError } = await window.supabase
       .from('program_plan_items')
       .insert({
         program_id: Number(programId),
@@ -191,8 +197,6 @@
       });
     });
 
-    // Pointer Events fallback for touch devices. Uses pointer capture so the
-    // drag remains attached to the finger while crossing the horizontal grid.
     root.querySelectorAll('[draggable="true"]').forEach((el) => {
       el.addEventListener('pointerdown', (event) => {
         if (event.pointerType !== 'touch') return;
@@ -254,6 +258,7 @@
 
   function activatePlanner() {
     plannerOpen = true;
+    state.currentView = 'tervezett';
     document.querySelector('.program-list')?.classList.add('hidden');
     document.getElementById('category-bar')?.classList.add('hidden');
     document.querySelector('.sort-bar')?.classList.add('hidden');
@@ -261,37 +266,42 @@
     document.querySelectorAll('.bottom-nav-item').forEach((item) => {
       item.classList.toggle('is-active', item.dataset.view === 'tervezett');
     });
+
     const placeholder = document.getElementById('placeholder-view');
-    placeholder?.classList.remove('hidden');
+    if (!placeholder) return;
+    placeholder.classList.remove('hidden');
+    placeholder.className = 'planner-view';
+    placeholder.innerHTML = '<div class="planner-error">Programtervező betöltése…</div>';
+
     loadPlan()
       .then(renderPlanner)
       .catch((error) => {
         console.error('Programtervező betöltési hiba:', error);
-        if (placeholder) placeholder.innerHTML = '<div class="planner-error">A programterv betöltése nem sikerült.</div>';
+        placeholder.className = 'planner-view';
+        placeholder.innerHTML = '<div class="planner-error">A programterv betöltése nem sikerült.</div>';
       });
   }
 
-  function leavePlanner() {
+  function restoreHeaderForOtherView() {
     if (!plannerOpen) return;
     plannerOpen = false;
-    document.querySelector('.app-title').textContent = 'Noszvaj és környéke';
-    document.querySelector('.program-list')?.classList.remove('hidden');
-    document.getElementById('category-bar')?.classList.remove('hidden');
-    document.querySelector('.sort-bar')?.classList.remove('hidden');
+    const title = document.querySelector('.app-title');
+    if (title) title.textContent = 'Noszvaj és környéke';
   }
 
-  document.addEventListener('click', (event) => {
-    const nav = event.target.closest('.bottom-nav-item');
-    if (!nav) return;
-    if (nav.dataset.view === 'tervezett') {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      state.currentView = 'tervezett';
-      activatePlanner();
-      return;
-    }
-    leavePlanner();
-  }, true);
+  // Important: app.js already owns the main navigation handlers. We only
+  // add a planner-specific handler after them. The previous document-level
+  // capture handler intercepted navigation and could leave the app stuck.
+  document.querySelectorAll('.bottom-nav-item').forEach((item) => {
+    item.addEventListener('click', () => {
+      if (item.dataset.view === 'tervezett') {
+        activatePlanner();
+      } else {
+        restoreHeaderForOtherView();
+      }
+    });
+  });
 
   window.renderPlannerView = activatePlanner;
+  window.leavePlannerView = restoreHeaderForOtherView;
 })();
